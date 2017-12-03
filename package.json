@@ -1,0 +1,36 @@
+{
+  "name": "fastify-secure-session",
+  "version": "0.0.1",
+  "description": "Create a secure stateless cookie session for Fastify",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && tap test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcollina/fastify-secure-session.git"
+  },
+  "keywords": [
+    "fastify",
+    "secure",
+    "session",
+    "sodium"
+  ],
+  "author": "Matteo Collina <hello@matteocollina.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mcollina/fastify-secure-session/issues"
+  },
+  "homepage": "https://github.com/mcollina/fastify-secure-session#readme",
+  "devDependencies": {
+    "fastify": "^0.35.3",
+    "pre-commit": "^1.2.2",
+    "standard": "^10.0.3",
+    "tap": "^11.0.0"
+  },
+  "dependencies": {
+    "fastify-cookie": "^1.1.2",
+    "fastify-plugin": "^0.1.1",
+    "sodium-universal": "^2.0.0"
+  }
+}

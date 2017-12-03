@@ -1,11 +1,5 @@
-# fastify-secure-session
+'use strict'
 
-Create a secure stateless cookie session for Fastify, based on libsodium's
-[Secret Key Box Encryption](https://github.com/sodium-friends/sodium-native#secret-key-box-encryption).
-
-## Example
-
-```js
 const fastify = require('fastify')({ logger: false })
 
 fastify.register(require('./'), {
@@ -27,12 +21,3 @@ fastify.get('/', (request, reply) => {
 })
 
 fastify.listen(3000)
-```
-
-## TODO
-
-* [ ] just sign, do not encrypt
-
-## License
-
-MIT
