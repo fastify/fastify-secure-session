@@ -5,13 +5,15 @@ const sodium = require('sodium-universal')
 const kObj = Symbol('object')
 
 module.exports = fp(function (fastify, options, next) {
-  if (!options.secret || Buffer.byteLength(options.secret) < sodium.crypto_secretbox_KEYBYTES) {
-    return next(new Error(`secret must be at least ${sodium.crypto_secretbox_KEYBYTES}`))
+  if (!options.secret || Buffer.byteLength(options.secret) < 32) {
+    return next(new Error(`secret must be at least 32`))
   }
 
-  const secret = Buffer.from(options.secret)
+  const secret = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
   const cookieName = options.cookieName || 'session'
   const cookieOptions = options.cookieOptions || {}
+
+  sodium.crypto_generichash(secret, Buffer.from(options.secret))
 
   // just to add something to the shape
   // TODO verify if it helps the perf
@@ -35,7 +37,10 @@ module.exports = fp(function (fastify, options, next) {
         return
       }
 
-      const [cyphertextB64, nonceB64] = cookie.split(';')
+      // do not use destructuring or it will deopt
+      const split = cookie.split(';')
+      const cyphertextB64 = split[0]
+      const nonceB64 = split[1]
 
       const cipher = Buffer.from(cyphertextB64, 'base64')
       const nonce = Buffer.from(nonceB64, 'base64')
