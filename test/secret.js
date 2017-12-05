@@ -1,18 +1,19 @@
 'use strict'
 
+const t = require('tap')
 const fastify = require('fastify')({ logger: false })
-const fs = require('fs')
-const path = require('path')
-const assert = require('assert')
 
-fastify.register(require('./'), {
-  key: fs.readFileSync(path.join(__dirname, 'example-key'))
+fastify.register(require('../'), {
+  secret: 'averylogphrasebiggerthanthirtytwochars'
 })
 
 fastify.post('/', (request, reply) => {
   request.session.set('data', request.body)
   reply.send('hello world')
 })
+
+t.tearDown(fastify.close.bind(fastify))
+t.plan(3)
 
 fastify.get('/', (request, reply) => {
   const data = request.session.get('data')
@@ -30,6 +31,9 @@ fastify.inject({
     some: 'data'
   }
 }, (response) => {
+  t.equal(response.statusCode, 200)
+  t.ok(response.headers['set-cookie'])
+
   fastify.inject({
     method: 'GET',
     url: '/',
@@ -37,6 +41,6 @@ fastify.inject({
       cookie: response.headers['set-cookie']
     }
   }, (response) => {
-    assert.deepEqual(JSON.parse(response.payload), { some: 'data' })
+    t.deepEqual(JSON.parse(response.payload), { some: 'data' })
   })
 })

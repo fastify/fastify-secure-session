@@ -2,9 +2,13 @@
 
 const t = require('tap')
 const fastify = require('fastify')({ logger: false })
+const sodium = require('sodium-universal')
+const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 
-fastify.register(require('./'), {
-  secret: 'averylogphrasebiggerthanthirtytwochars'
+sodium.randombytes_buf(key)
+
+fastify.register(require('../'), {
+  key: key.toString('base64')
 })
 
 fastify.post('/', (request, reply) => {

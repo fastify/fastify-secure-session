@@ -9,18 +9,39 @@ const kObj = Symbol('object')
 const salt = Buffer.from('mq9hDxBVDbspDR6nLfFT1g==', 'base64')
 
 module.exports = fp(function (fastify, options, next) {
-  if (!options.secret || Buffer.byteLength(options.secret) < 32) {
-    return next(new Error(`secret must be at least 32`))
+  var key
+  if (options.secret) {
+    if (Buffer.byteLength(options.secret) < 32) {
+      return next(new Error('secret must be at least 32 bytes'))
+    }
+
+    key = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
+
+    sodium.crypto_pwhash(key, Buffer.from(options.secret), salt,
+                         sodium.crypto_pwhash_OPSLIMIT_MODERATE,
+                         sodium.crypto_pwhash_MEMLIMIT_MODERATE,
+                         sodium.crypto_pwhash_ALG_DEFAULT)
   }
 
-  const key = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
+  if (options.key) {
+    key = options.key
+    if (typeof key === 'string') {
+      key = Buffer.from(key, 'base64')
+    } else if (!(key instanceof Buffer)) {
+      return next(new Error('key must be a string or a Buffer'))
+    }
+
+    if (key.length < sodium.crypto_secretbox_KEYBYTES) {
+      return next(new Error(`key must be at least ${sodium.crypto_secretbox_KEYBYTES} bytes`))
+    }
+  }
+
+  if (!key) {
+    return next(new Error('key or secret must specified'))
+  }
+
   const cookieName = options.cookieName || 'session'
   const cookieOptions = options.cookieOptions || {}
-
-  sodium.crypto_pwhash(key, Buffer.from(options.secret), salt,
-                       sodium.crypto_pwhash_OPSLIMIT_MODERATE,
-                       sodium.crypto_pwhash_MEMLIMIT_MODERATE,
-                       sodium.crypto_pwhash_ALG_DEFAULT)
 
   // just to add something to the shape
   // TODO verify if it helps the perf
