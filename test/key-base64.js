@@ -2,7 +2,7 @@
 
 const t = require('tap')
 const fastify = require('fastify')({ logger: false })
-const sodium = require('sodium-universal')
+const sodium = require('sodium-native')
 const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 
 sodium.randombytes_buf(key)
