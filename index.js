@@ -1,7 +1,7 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const sodium = require('sodium-universal')
+const sodium = require('sodium-native')
 const kObj = Symbol('object')
 
 // static salt to be used for key derivation, not great for security,

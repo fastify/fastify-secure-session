@@ -34,6 +34,6 @@
   "dependencies": {
     "fastify-cookie": "^1.1.2",
     "fastify-plugin": "^0.1.1",
-    "sodium-universal": "^2.0.0"
+    "sodium-native": "^2.0.1"
   }
 }
