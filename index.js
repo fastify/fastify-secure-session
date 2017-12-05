@@ -4,16 +4,23 @@ const fp = require('fastify-plugin')
 const sodium = require('sodium-universal')
 const kObj = Symbol('object')
 
+// static salt to be used for key derivation, not great for security,
+// but better than nothing
+const salt = Buffer.from('mq9hDxBVDbspDR6nLfFT1g==', 'base64')
+
 module.exports = fp(function (fastify, options, next) {
   if (!options.secret || Buffer.byteLength(options.secret) < 32) {
     return next(new Error(`secret must be at least 32`))
   }
 
-  const secret = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
+  const key = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
   const cookieName = options.cookieName || 'session'
   const cookieOptions = options.cookieOptions || {}
 
-  sodium.crypto_generichash(secret, Buffer.from(options.secret))
+  sodium.crypto_pwhash(key, Buffer.from(options.secret), salt,
+                       sodium.crypto_pwhash_OPSLIMIT_MODERATE,
+                       sodium.crypto_pwhash_MEMLIMIT_MODERATE,
+                       sodium.crypto_pwhash_ALG_DEFAULT)
 
   // just to add something to the shape
   // TODO verify if it helps the perf
@@ -53,7 +60,7 @@ module.exports = fp(function (fastify, options, next) {
       }
 
       const msg = Buffer.allocUnsafe(cipher.length - sodium.crypto_secretbox_MACBYTES)
-      if (!sodium.crypto_secretbox_open_easy(msg, cipher, nonce, secret)) {
+      if (!sodium.crypto_secretbox_open_easy(msg, cipher, nonce, key)) {
         // unable to decrypt
         request.session = new Session({})
         next()
@@ -77,7 +84,7 @@ module.exports = fp(function (fastify, options, next) {
       const msg = Buffer.from(JSON.stringify(session[kObj]))
 
       const cipher = Buffer.allocUnsafe(msg.length + sodium.crypto_secretbox_MACBYTES)
-      sodium.crypto_secretbox_easy(cipher, msg, nonce, secret)
+      sodium.crypto_secretbox_easy(cipher, msg, nonce, key)
 
       reply.setCookie(cookieName, cipher.toString('base64') + ';' + nonce.toString('base64'), cookieOptions)
       next()
