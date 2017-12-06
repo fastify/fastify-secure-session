@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "description": "Create a secure stateless cookie session for Fastify",
   "main": "index.js",
+  "bin": {
+    "secure-session-gen-key": "genKey.js"
+  },
   "scripts": {
-    "test": "standard && tap test.js"
+    "test": "standard && tap test/*.js"
   },
   "repository": {
     "type": "git",
@@ -31,6 +34,6 @@
   "dependencies": {
     "fastify-cookie": "^1.1.2",
     "fastify-plugin": "^0.1.1",
-    "sodium-universal": "^2.0.0"
+    "sodium-native": "^2.0.1"
   }
 }

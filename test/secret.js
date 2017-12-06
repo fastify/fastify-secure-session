@@ -3,7 +3,7 @@
 const t = require('tap')
 const fastify = require('fastify')({ logger: false })
 
-fastify.register(require('./'), {
+fastify.register(require('../'), {
   secret: 'averylogphrasebiggerthanthirtytwochars'
 })
 

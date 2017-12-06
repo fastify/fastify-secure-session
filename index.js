@@ -1,15 +1,45 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const sodium = require('sodium-universal')
+const sodium = require('sodium-native')
 const kObj = Symbol('object')
 
+// static salt to be used for key derivation, not great for security,
+// but better than nothing
+const salt = Buffer.from('mq9hDxBVDbspDR6nLfFT1g==', 'base64')
+
 module.exports = fp(function (fastify, options, next) {
-  if (!options.secret || Buffer.byteLength(options.secret) < sodium.crypto_secretbox_KEYBYTES) {
-    return next(new Error(`secret must be at least ${sodium.crypto_secretbox_KEYBYTES}`))
+  var key
+  if (options.secret) {
+    if (Buffer.byteLength(options.secret) < 32) {
+      return next(new Error('secret must be at least 32 bytes'))
+    }
+
+    key = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
+
+    sodium.crypto_pwhash(key, Buffer.from(options.secret), salt,
+                         sodium.crypto_pwhash_OPSLIMIT_MODERATE,
+                         sodium.crypto_pwhash_MEMLIMIT_MODERATE,
+                         sodium.crypto_pwhash_ALG_DEFAULT)
   }
 
-  const secret = Buffer.from(options.secret)
+  if (options.key) {
+    key = options.key
+    if (typeof key === 'string') {
+      key = Buffer.from(key, 'base64')
+    } else if (!(key instanceof Buffer)) {
+      return next(new Error('key must be a string or a Buffer'))
+    }
+
+    if (key.length < sodium.crypto_secretbox_KEYBYTES) {
+      return next(new Error(`key must be at least ${sodium.crypto_secretbox_KEYBYTES} bytes`))
+    }
+  }
+
+  if (!key) {
+    return next(new Error('key or secret must specified'))
+  }
+
   const cookieName = options.cookieName || 'session'
   const cookieOptions = options.cookieOptions || {}
 
@@ -35,7 +65,10 @@ module.exports = fp(function (fastify, options, next) {
         return
       }
 
-      const [cyphertextB64, nonceB64] = cookie.split(';')
+      // do not use destructuring or it will deopt
+      const split = cookie.split(';')
+      const cyphertextB64 = split[0]
+      const nonceB64 = split[1]
 
       const cipher = Buffer.from(cyphertextB64, 'base64')
       const nonce = Buffer.from(nonceB64, 'base64')
@@ -48,7 +81,7 @@ module.exports = fp(function (fastify, options, next) {
       }
 
       const msg = Buffer.allocUnsafe(cipher.length - sodium.crypto_secretbox_MACBYTES)
-      if (!sodium.crypto_secretbox_open_easy(msg, cipher, nonce, secret)) {
+      if (!sodium.crypto_secretbox_open_easy(msg, cipher, nonce, key)) {
         // unable to decrypt
         request.session = new Session({})
         next()
@@ -72,7 +105,7 @@ module.exports = fp(function (fastify, options, next) {
       const msg = Buffer.from(JSON.stringify(session[kObj]))
 
       const cipher = Buffer.allocUnsafe(msg.length + sodium.crypto_secretbox_MACBYTES)
-      sodium.crypto_secretbox_easy(cipher, msg, nonce, secret)
+      sodium.crypto_secretbox_easy(cipher, msg, nonce, key)
 
       reply.setCookie(cookieName, cipher.toString('base64') + ';' + nonce.toString('base64'), cookieOptions)
       next()
