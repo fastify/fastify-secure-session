@@ -41,7 +41,7 @@ module.exports = fp(function (fastify, options, next) {
   }
 
   const cookieName = options.cookieName || 'session'
-  const cookieOptions = options.cookieOptions || {}
+  const cookieOptions = options.cookieOptions || options.cookie || {}
 
   // just to add something to the shape
   // TODO verify if it helps the perf

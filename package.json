@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/mcollina/fastify-secure-session#readme",
   "devDependencies": {
+    "cookie": "^0.3.1",
     "fastify": "^0.35.3",
     "pre-commit": "^1.2.2",
     "standard": "^10.0.3",
