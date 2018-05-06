@@ -30,7 +30,7 @@ fastify.inject({
     some: 'data'
   }
 }, (error, response) => {
-  if(error) throw error;
+  if (error) throw error
 
   fastify.inject({
     method: 'GET',
@@ -39,7 +39,7 @@ fastify.inject({
       cookie: response.headers['set-cookie']
     }
   }, (error, response) => {
-    if(error) throw error;
+    if (error) throw error
 
     assert.deepEqual(JSON.parse(response.payload), { some: 'data' })
   })
