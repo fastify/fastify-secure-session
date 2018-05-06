@@ -29,14 +29,18 @@ fastify.inject({
   payload: {
     some: 'data'
   }
-}, (response) => {
+}, (error, response) => {
+  if(error) throw error;
+
   fastify.inject({
     method: 'GET',
     url: '/',
     headers: {
       cookie: response.headers['set-cookie']
     }
-  }, (response) => {
+  }, (error, response) => {
+    if(error) throw error;
+
     assert.deepEqual(JSON.parse(response.payload), { some: 'data' })
   })
 })

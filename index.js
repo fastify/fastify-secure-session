@@ -18,9 +18,9 @@ module.exports = fp(function (fastify, options, next) {
     key = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
 
     sodium.crypto_pwhash(key, Buffer.from(options.secret), salt,
-                         sodium.crypto_pwhash_OPSLIMIT_MODERATE,
-                         sodium.crypto_pwhash_MEMLIMIT_MODERATE,
-                         sodium.crypto_pwhash_ALG_DEFAULT)
+      sodium.crypto_pwhash_OPSLIMIT_MODERATE,
+      sodium.crypto_pwhash_MEMLIMIT_MODERATE,
+      sodium.crypto_pwhash_ALG_DEFAULT)
   }
 
   if (options.key) {

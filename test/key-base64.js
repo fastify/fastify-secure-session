@@ -17,7 +17,7 @@ fastify.post('/', (request, reply) => {
 })
 
 t.tearDown(fastify.close.bind(fastify))
-t.plan(3)
+t.plan(5)
 
 fastify.get('/', (request, reply) => {
   const data = request.session.get('data')
@@ -34,7 +34,8 @@ fastify.inject({
   payload: {
     some: 'data'
   }
-}, (response) => {
+}, (error, response) => {
+  t.error(error)
   t.equal(response.statusCode, 200)
   t.ok(response.headers['set-cookie'])
 
@@ -44,7 +45,8 @@ fastify.inject({
     headers: {
       cookie: response.headers['set-cookie']
     }
-  }, (response) => {
+  }, (error, response) => {
+    t.error(error)
     t.deepEqual(JSON.parse(response.payload), { some: 'data' })
   })
 })
