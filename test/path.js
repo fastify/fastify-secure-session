@@ -16,7 +16,7 @@ fastify.register(require('../'), {
 })
 
 t.tearDown(fastify.close.bind(fastify))
-t.plan(3)
+t.plan(4)
 
 fastify.post('/auth', (request, reply) => {
   request.session.set('data', request.body)
@@ -38,7 +38,8 @@ fastify.inject({
   payload: {
     some: 'data'
   }
-}, (response) => {
+}, (err, response) => {
+  t.error(err)
   t.equal(response.statusCode, 200)
   t.ok(response.headers['set-cookie'])
   t.equal(cookie.parse(response.headers['set-cookie']).Path, '/')
