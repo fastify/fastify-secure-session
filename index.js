@@ -95,7 +95,7 @@ module.exports = fp(function (fastify, options, next) {
     fastify.addHook('onSend', function encodeSession (request, reply, payload, next) {
       const session = request.session
 
-      if (!session.changed) {
+      if (!session || !session.changed) {
         // nothing to do
         next()
         return
