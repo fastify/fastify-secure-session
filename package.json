@@ -4,7 +4,7 @@
   "description": "Create a secure stateless cookie session for Fastify",
   "main": "index.js",
   "bin": {
-    "secure-session-gen-key": "genKey.js"
+    "secure-session-gen-key": "genkey.js"
   },
   "scripts": {
     "test": "standard && tap test/*.js"
