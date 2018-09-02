@@ -41,6 +41,6 @@ fastify.inject({
   }, (error, response) => {
     if (error) throw error
 
-    assert.deepEqual(JSON.parse(response.payload), { some: 'data' })
+    assert.deepStrictEqual(JSON.parse(response.payload), { some: 'data' })
   })
 })
