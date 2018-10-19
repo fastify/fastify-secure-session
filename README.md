@@ -46,7 +46,7 @@ fastify.get('/', (request, reply) => {
 
 ## Using a secret
 
-It is possible to generate a high-entropy key from a (low-entropy)
+It's possible to generate a high-entropy key from a (low-entropy)
 secret passphrase. This approach is the simplest to use, but it adds
 a significant startup delay as strong cryptography is applied.
 
@@ -55,6 +55,7 @@ const fastify = require('fastify')({ logger: false })
 
 fastify.register(require('./'), {
   secret: 'averylogphrasebiggerthanthirtytwochars',
+  salt: 'mq9hDxBVDbspDR6nLfFT1g==',
   cookie: {
     // options from setCookie, see https://github.com/fastify/fastify-cookie
   }

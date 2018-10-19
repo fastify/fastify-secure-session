@@ -4,10 +4,6 @@ const fp = require('fastify-plugin')
 const sodium = require('sodium-native')
 const kObj = Symbol('object')
 
-// static salt to be used for key derivation, not great for security,
-// but better than nothing
-const salt = Buffer.from('mq9hDxBVDbspDR6nLfFT1g==', 'base64')
-
 module.exports = fp(function (fastify, options, next) {
   var key
   if (options.secret) {
@@ -17,7 +13,23 @@ module.exports = fp(function (fastify, options, next) {
 
     key = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
 
-    sodium.crypto_pwhash(key, Buffer.from(options.secret), salt,
+    // static salt to be used for key derivation, not great for security,
+    // but better than nothing
+    var salt = 'mq9hDxBVDbspDR6nLfFT1g=='
+
+    if (options.salt) {
+      salt = options.salt
+    }
+
+    salt = Buffer.from(salt, 'base64')
+
+    if (Buffer.byteLength(salt) !== sodium.crypto_pwhash_SALTBYTES) {
+      return next(new Error('salt must be length 24'))
+    }
+
+    sodium.crypto_pwhash(key,
+      Buffer.from(options.secret),
+      salt,
       sodium.crypto_pwhash_OPSLIMIT_MODERATE,
       sodium.crypto_pwhash_MEMLIMIT_MODERATE,
       sodium.crypto_pwhash_ALG_DEFAULT)
