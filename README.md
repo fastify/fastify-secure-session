@@ -42,6 +42,11 @@ fastify.get('/', (request, reply) => {
   }
   reply.send(data)
 })
+
+fastify.post('/logout', (request, reply) => {
+  request.session.delete()
+  reply.send('logged out')
+})
 ```
 
 ## Using a secret
