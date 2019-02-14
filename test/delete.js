@@ -75,9 +75,6 @@ fastify.inject({
       t.error(error)
       t.equal(response.statusCode, 200)
       t.ok(response.headers['set-cookie'])
-
-      console.log(response.headers['set-cookie'])
-
       t.equal(cookie.parse(response.headers['set-cookie']).Path, '/')
       t.equal(cookie.parse(response.headers['set-cookie']).Expires, 'Thu, 01 Jan 1970 00:00:00 GMT')
       t.equal(cookie.parse(response.headers['set-cookie'])['Max-Age'], '0')
