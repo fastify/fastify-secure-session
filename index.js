@@ -111,6 +111,11 @@ module.exports = fp(function (fastify, options, next) {
         // nothing to do
         next()
         return
+      } else if (session.deleted) {
+        const tmpCookieOptions = Object.assign({}, cookieOptions, { expires: new Date(0), maxAge: 0 })
+        reply.setCookie(cookieName, '', tmpCookieOptions)
+        next()
+        return
       }
 
       const nonce = genNonce()
@@ -131,6 +136,7 @@ class Session {
   constructor (obj) {
     this[kObj] = obj
     this.changed = false
+    this.deleted = false
   }
 
   get (key) {
@@ -140,6 +146,11 @@ class Session {
   set (key, value) {
     this.changed = true
     this[kObj][key] = value
+  }
+
+  delete () {
+    this.changed = true
+    this.deleted = true
   }
 }
 
