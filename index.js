@@ -68,7 +68,7 @@ module.exports = fp(function (fastify, options, next) {
   function addHooks (fastify, options, next) {
     // the hooks must be registered after fastify-cookie hooks
 
-    fastify.addHook('preHandler', function decodeSession (request, reply, next) {
+    fastify.addHook('onRequest', function decodeSession (request, reply, next) {
       const cookie = request.cookies[cookieName]
       if (cookie === undefined) {
         // there is no cookie
