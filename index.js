@@ -18,7 +18,7 @@ module.exports = fp(function (fastify, options, next) {
     if (options.salt) {
       salt = Buffer.from(options.salt, 'ascii')
     } else {
-      sodium.randombytes_buf(salt)
+      salt = Buffer.from('mq9hDxBVDbspDR6n', 'ascii')
     }
 
     if (Buffer.byteLength(salt) !== sodium.crypto_pwhash_SALTBYTES) {
