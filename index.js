@@ -6,21 +6,20 @@ const kObj = Symbol('object')
 
 module.exports = fp(function (fastify, options, next) {
   var key
-  var salt
   if (options.secret) {
     if (Buffer.byteLength(options.secret) < 32) {
       return next(new Error('secret must be at least 32 bytes'))
     }
 
-    key = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
-    salt = Buffer.alloc(sodium.crypto_pwhash_SALTBYTES)
+    // static salt to be used for key derivation, not great for security,
+    // but better than nothing
+    var salt = 'mq9hDxBVDbspDR6n'
 
     if (options.salt) {
-      salt = Buffer.from(options.salt, 'ascii')
-    } else {
-      salt = Buffer.from('mq9hDxBVDbspDR6n', 'ascii')
+      salt = options.salt
     }
 
+    salt = Buffer.from(salt, 'ascii')
     if (Buffer.byteLength(salt) !== sodium.crypto_pwhash_SALTBYTES) {
       return next(new Error('salt must be length ' + sodium.crypto_pwhash_SALTBYTES))
     }
