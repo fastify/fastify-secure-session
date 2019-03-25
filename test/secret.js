@@ -1,8 +1,8 @@
 'use strict'
 
-const t = require('tap')
+const tap = require('tap')
 
-t.test('Using a secret without salt', function (childTest) {
+tap.test('using secret without salt', function (t) {
   const fastify = require('fastify')({
     logger: false
   })
@@ -16,8 +16,8 @@ t.test('Using a secret without salt', function (childTest) {
     reply.send('hello world')
   })
 
-  childTest.tearDown(fastify.close.bind(fastify))
-  childTest.plan(5)
+  t.tearDown(fastify.close.bind(fastify))
+  t.plan(5)
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
@@ -35,10 +35,9 @@ t.test('Using a secret without salt', function (childTest) {
       some: 'data'
     }
   }, (error, response) => {
-    debugger;
-    childTest.error(error)
-    childTest.equal(response.statusCode, 200)
-    childTest.ok(response.headers['set-cookie'])
+    t.error(error)
+    t.equal(response.statusCode, 200)
+    t.ok(response.headers['set-cookie'])
 
     fastify.inject({
       method: 'GET',
@@ -47,63 +46,63 @@ t.test('Using a secret without salt', function (childTest) {
         cookie: response.headers['set-cookie']
       }
     }, (error, response) => {
-      childTest.error(error)
-      childTest.deepEqual(JSON.parse(response.payload), {
+      t.error(error)
+      t.deepEqual(JSON.parse(response.payload), {
         some: 'data'
       })
     })
   })
 })
 
-// t.test('Using a secret without salt', function (childTest) {
-//   const fastify = require('fastify')({
-//     logger: false
-//   })
+tap.test('using secret with salt', function (t) {
+  const fastify = require('fastify')({
+    logger: false
+  })
 
-//   fastify.register(require('../'), {
-//     secret: 'averylogphrasebiggerthanthirtytwochars',
-//     salt: 'mq9hDxBVDbspDR6n'
-//   })
+  fastify.register(require('../'), {
+    secret: 'averylogphrasebiggerthanthirtytwochars',
+    salt: 'mq9hDxBVDbspDR6n'
+  })
 
-//   fastify.post('/', (request, reply) => {
-//     request.session.set('data', request.body)
-//     reply.send('hello world')
-//   })
+  fastify.post('/', (request, reply) => {
+    request.session.set('data', request.body)
+    reply.send('hello world')
+  })
 
-//   childTest.tearDown(fastify.close.bind(fastify))
-//   childTest.plan(5)
+  t.tearDown(fastify.close.bind(fastify))
+  t.plan(5)
 
-//   fastify.get('/', (request, reply) => {
-//     const data = request.session.get('data')
-//     if (!data) {
-//       reply.code(404).send()
-//       return
-//     }
-//     reply.send(data)
-//   })
+  fastify.get('/', (request, reply) => {
+    const data = request.session.get('data')
+    if (!data) {
+      reply.code(404).send()
+      return
+    }
+    reply.send(data)
+  })
 
-//   fastify.inject({
-//     method: 'POST',
-//     url: '/',
-//     payload: {
-//       some: 'data'
-//     }
-//   }, (error, response) => {
-//     childTest.error(error)
-//     childTest.equal(response.statusCode, 200)
-//     childTest.ok(response.headers['set-cookie'])
+  fastify.inject({
+    method: 'POST',
+    url: '/',
+    payload: {
+      some: 'data'
+    }
+  }, (error, response) => {
+    t.error(error)
+    t.equal(response.statusCode, 200)
+    t.ok(response.headers['set-cookie'])
 
-//     fastify.inject({
-//       method: 'GET',
-//       url: '/',
-//       headers: {
-//         cookie: response.headers['set-cookie']
-//       }
-//     }, (error, response) => {
-//       childTest.error(error)
-//       childTest.deepEqual(JSON.parse(response.payload), {
-//         some: 'data'
-//       })
-//     })
-//   })
-// })
+    fastify.inject({
+      method: 'GET',
+      url: '/',
+      headers: {
+        cookie: response.headers['set-cookie']
+      }
+    }, (error, response) => {
+      t.error(error)
+      t.deepEqual(JSON.parse(response.payload), {
+        some: 'data'
+      })
+    })
+  })
+})

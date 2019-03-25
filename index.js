@@ -11,6 +11,8 @@ module.exports = fp(function (fastify, options, next) {
       return next(new Error('secret must be at least 32 bytes'))
     }
 
+    key = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
+
     // static salt to be used for key derivation, not great for security,
     // but better than nothing
     var salt = 'mq9hDxBVDbspDR6n'
@@ -20,8 +22,9 @@ module.exports = fp(function (fastify, options, next) {
     }
 
     salt = Buffer.from(salt, 'ascii')
+
     if (Buffer.byteLength(salt) !== sodium.crypto_pwhash_SALTBYTES) {
-      return next(new Error('salt must be length ' + sodium.crypto_pwhash_SALTBYTES))
+      return next(new Error('salt must be length 16'))
     }
 
     sodium.crypto_pwhash(key,
