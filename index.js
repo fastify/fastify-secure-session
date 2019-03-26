@@ -15,16 +15,14 @@ module.exports = fp(function (fastify, options, next) {
 
     // static salt to be used for key derivation, not great for security,
     // but better than nothing
-    var salt = 'mq9hDxBVDbspDR6n'
+    var salt = Buffer.from('mq9hDxBVDbspDR6nLfFT1g==', 'base64')
 
     if (options.salt) {
-      salt = options.salt
+      salt = (Buffer.isBuffer(options.salt)) ? options.salt : Buffer.from(options.salt, 'ascii')
     }
 
-    salt = Buffer.from(salt, 'ascii')
-
     if (Buffer.byteLength(salt) !== sodium.crypto_pwhash_SALTBYTES) {
-      return next(new Error('salt must be length 16'))
+      return next(new Error('salt must be length ' + sodium.crypto_pwhash_SALTBYTES))
     }
 
     sodium.crypto_pwhash(key,
