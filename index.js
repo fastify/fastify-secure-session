@@ -81,8 +81,8 @@ module.exports = fp(function (fastify, options, next) {
       const split = cookie.split(';')
       const cyphertextB64 = split[0]
       const nonceB64 = split[1]
-      
-      if (split.length<=1) {
+
+      if (split.length <=1) {
         // the cookie is malformed
         request.session = new Session({})
         next()
