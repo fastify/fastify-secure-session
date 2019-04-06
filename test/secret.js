@@ -54,7 +54,7 @@ tap.test('using secret without salt', function (t) {
   })
 })
 
-tap.test('using secret with salt.Salt is string', function (t) {
+tap.test('using secret with salt as string', function (t) {
   const fastify = require('fastify')({
     logger: false
   })
@@ -107,7 +107,7 @@ tap.test('using secret with salt.Salt is string', function (t) {
   })
 })
 
-tap.test('using secret with salt.Salt is baffer', function (t) {
+tap.test('using secret with salt as buffer', function (t) {
   const fastify = require('fastify')({
     logger: false
   })
