@@ -60,7 +60,7 @@ const fastify = require('fastify')({ logger: false })
 
 fastify.register(require('./'), {
   secret: 'averylogphrasebiggerthanthirtytwochars',
-  salt: 'mq9hDxBVDbspDR6nLfFT1g==',
+  salt: 'mq9hDxBVDbspDR6n',
   cookie: {
     // options from setCookie, see https://github.com/fastify/fastify-cookie
   }
