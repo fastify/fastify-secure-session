@@ -27,14 +27,14 @@
   "homepage": "https://github.com/mcollina/fastify-secure-session#readme",
   "devDependencies": {
     "cookie": "^0.4.0",
-    "fastify": "^2.0.0",
+    "fastify": "^3.0.0-rc.1",
     "pre-commit": "^1.2.2",
     "standard": "^12.0.1",
     "tap": "^12.5.3"
   },
   "dependencies": {
-    "fastify-cookie": "^3.0.0",
-    "fastify-plugin": "^1.5.0",
+    "fastify-cookie": "github:frikille/fastify-cookie#fix-deprecation-warning",
+    "fastify-plugin": "^2.0.0",
     "sodium-native": "^3.0.0"
   }
 }
