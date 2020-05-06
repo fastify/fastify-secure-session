@@ -30,7 +30,7 @@
     "fastify": "^3.0.0-rc.1",
     "pre-commit": "^1.2.2",
     "standard": "^14.3.3",
-    "tap": "^12.5.3"
+    "tap": "^14.10.7"
   },
   "dependencies": {
     "fastify-cookie": "^4.0.1",
