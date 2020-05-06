@@ -136,7 +136,7 @@ module.exports = fp(function (fastify, options, next) {
     next()
   }
 }, {
-  fastify: '>=3.x',
+  fastify: '3.x',
   name: 'fastify-secure-session'
 })
 
