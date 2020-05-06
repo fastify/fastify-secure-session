@@ -135,7 +135,10 @@ module.exports = fp(function (fastify, options, next) {
 
     next()
   }
-}, '>= 0.35.0')
+}, {
+  fastify: '3.x',
+  name: 'fastify-secure-session'
+})
 
 class Session {
   constructor (obj) {
