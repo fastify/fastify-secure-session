@@ -37,17 +37,25 @@ module.exports = fp(function (fastify, options, next) {
     key = options.key
     if (typeof key === 'string') {
       key = Buffer.from(key, 'base64')
+    } else if (key instanceof Array) {
+      key = key.map(ensureBufferKey)
     } else if (!(key instanceof Buffer)) {
       return next(new Error('key must be a string or a Buffer'))
     }
 
-    if (key.length < sodium.crypto_secretbox_KEYBYTES) {
+    if (!(key instanceof Array) && key.length < sodium.crypto_secretbox_KEYBYTES) {
       return next(new Error(`key must be at least ${sodium.crypto_secretbox_KEYBYTES} bytes`))
+    } else if (key instanceof Array && key.some(k => k < sodium.crypto_secretbox_KEYBYTES)) {
+      return next(new Error(`key lengths must be at least ${sodium.crypto_secretbox_KEYBYTES} bytes`))
     }
   }
 
   if (!key) {
     return next(new Error('key or secret must specified'))
+  }
+
+  if (!(key instanceof Array)) {
+    key = [key]
   }
 
   const cookieName = options.cookieName || 'session'
@@ -98,7 +106,8 @@ module.exports = fp(function (fastify, options, next) {
       }
 
       const msg = Buffer.allocUnsafe(cipher.length - sodium.crypto_secretbox_MACBYTES)
-      if (!sodium.crypto_secretbox_open_easy(msg, cipher, nonce, key)) {
+
+      if (!key.some(k => sodium.crypto_secretbox_open_easy(msg, cipher, nonce, k))) {
         // unable to decrypt
         request.session = new Session({})
         next()
@@ -127,7 +136,7 @@ module.exports = fp(function (fastify, options, next) {
       const msg = Buffer.from(JSON.stringify(session[kObj]))
 
       const cipher = Buffer.allocUnsafe(msg.length + sodium.crypto_secretbox_MACBYTES)
-      sodium.crypto_secretbox_easy(cipher, msg, nonce, key)
+      sodium.crypto_secretbox_easy(cipher, msg, nonce, key[0])
 
       reply.setCookie(cookieName, cipher.toString('base64') + ';' + nonce.toString('base64'), cookieOptions)
       next()
@@ -166,4 +175,16 @@ function genNonce () {
   var buf = Buffer.allocUnsafe(sodium.crypto_secretbox_NONCEBYTES)
   sodium.randombytes_buf(buf)
   return buf
+}
+
+function ensureBufferKey (k) {
+  if (k instanceof Buffer) {
+    return k
+  }
+
+  if (typeof k !== 'string') {
+    throw new Error('Key must be string or buffer')
+  }
+
+  return Buffer.from(k, 'base64')
 }
