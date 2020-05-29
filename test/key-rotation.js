@@ -1,6 +1,5 @@
 'use strict'
 
-// const crypto = require('crypto')
 const tap = require('tap')
 const sodium = require('sodium-native')
 
