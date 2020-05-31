@@ -1,10 +1,12 @@
 'use strict'
 
+const Fastify = require('fastify')
 const tap = require('tap')
 const sodium = require('sodium-native')
+const fastifySecureSession = require('..')
 
 tap.test('support string key array', async t => {
-  const fastify = require('fastify')({ logger: false })
+  const fastify = Fastify({ logger: false })
 
   t.tearDown(fastify.close.bind(fastify))
   t.plan(5)
@@ -15,7 +17,7 @@ tap.test('support string key array', async t => {
   const key2 = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
   sodium.randombytes_buf(key2)
 
-  fastify.register(require('../'), {
+  fastify.register(fastifySecureSession, {
     key: [key1.toString('base64'), key2.toString('base64')]
   })
 
@@ -67,7 +69,7 @@ tap.test('support string key array', async t => {
 })
 
 tap.test('support key rotation with buffer key array', async t => {
-  let fastify = require('fastify')({ logger: false })
+  let fastify = Fastify({ logger: false })
 
   t.tearDown(fastify.close.bind(fastify))
   t.plan(5)
@@ -78,7 +80,7 @@ tap.test('support key rotation with buffer key array', async t => {
   const key2 = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
   sodium.randombytes_buf(key2)
 
-  fastify.register(require('../'), {
+  fastify.register(fastifySecureSession, {
     key: [key1, key2]
   })
 
@@ -120,9 +122,9 @@ tap.test('support key rotation with buffer key array', async t => {
   // restart fastify to switch key order (rotation)
   await fastify.close()
 
-  fastify = require('fastify')({ logger: false })
+  fastify = Fastify({ logger: false })
 
-  fastify.register(require('../'), {
+  fastify.register(fastifySecureSession, {
     key: [key2, key1]
   })
 
