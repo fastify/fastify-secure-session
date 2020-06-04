@@ -107,7 +107,16 @@ module.exports = fp(function (fastify, options, next) {
 
       const msg = Buffer.allocUnsafe(cipher.length - sodium.crypto_secretbox_MACBYTES)
 
-      if (!key.some(k => sodium.crypto_secretbox_open_easy(msg, cipher, nonce, k))) {
+      let signingKeyRotated = false
+      const decodeSuccess = key.some((k, i) => {
+        const decoded = sodium.crypto_secretbox_open_easy(msg, cipher, nonce, k)
+
+        signingKeyRotated = decoded && i > 0
+
+        return decoded
+      })
+
+      if (!decodeSuccess) {
         // unable to decrypt
         request.session = new Session({})
         next()
@@ -115,6 +124,11 @@ module.exports = fp(function (fastify, options, next) {
       }
 
       request.session = new Session(JSON.parse(msg))
+
+      if (signingKeyRotated) {
+        request.session.changed = true
+      }
+
       next()
     })
 
