@@ -21,11 +21,11 @@ const fastify = require('fastify')({ logger: false })
 const fs = require('fs')
 const path = require('path')
 
-fastify.register(require('./'), {
+fastify.register(require('fastify-secure-session'), {
   // adapt this to point to the directory where secret-key is located
   key: fs.readFileSync(path.join(__dirname, 'secret-key')),
   cookie: {
-    // options from setCookie, see https://github.com/fastify/fastify-cookie
+    // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
 
@@ -49,6 +49,10 @@ fastify.post('/logout', (request, reply) => {
 })
 ```
 
+If you enable [`debug` logging](https://www.fastify.io/docs/latest/Logging/),
+you will see what steps the library is doing and understand why a session you
+expect to be there is not present.
+
 ## Using a secret
 
 It's possible to generate a high-entropy key from a (low-entropy)
@@ -58,11 +62,11 @@ a significant startup delay as strong cryptography is applied.
 ```js
 const fastify = require('fastify')({ logger: false })
 
-fastify.register(require('./'), {
+fastify.register(require('fastify-secure-session'), {
   secret: 'averylogphrasebiggerthanthirtytwochars',
   salt: 'mq9hDxBVDbspDR6n',
   cookie: {
-    // options from setCookie, see https://github.com/fastify/fastify-cookie
+    // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
 
@@ -93,11 +97,11 @@ IMPORTANT: The new key you are trying to rotate to should always be the first ke
 
 ```js
 // first time running the app
-fastify.register(require('./'), {
+fastify.register(require('fastify-secure-session'), {
   key: [mySecureKey]
 
   cookie: {
-    // options from setCookie, see https://github.com/fastify/fastify-cookie
+    // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
 ```
@@ -106,11 +110,11 @@ being able to rotate your secret credentials for your application?  This library
 do the following:
 ```js
 // first time running the app
-fastify.register(require('./'), {
+fastify.register(require('fastify-secure-session'), {
   key: [myNewKey, mySecureKey]
 
   cookie: {
-    // options from setCookie, see https://github.com/fastify/fastify-cookie
+    // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
 ```
@@ -130,13 +134,13 @@ const fastify = require('fastify')({ logger: false })
 const key1 = fs.readFileSync(path.join(__dirname, 'secret-key1'))
 const key2 = fs.readFileSync(path.join(__dirname, 'secret-key2'))
 
-fastify.register(require('./'), {
+fastify.register(require('fastify-secure-session'), {
   // any old sessions signed with key2 will still be decoded successfully the first time and
   // then re-signed with key1 to keep good performance with subsequent calls
   key: [key1, key2],
 
   cookie: {
-    // options from setCookie, see https://github.com/fastify/fastify-cookie
+    // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
 
