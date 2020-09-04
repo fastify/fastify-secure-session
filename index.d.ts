@@ -14,7 +14,8 @@ export type SecureSessionPluginOptions = {
   cookie?: CookieSerializeOptions
 } & ({key: string | Buffer | (string | Buffer)[]} | {
   secret: string | Buffer,
-  salt: string | Buffer
+  salt: string | Buffer,
+  muteLogs?: boolean,
 })
 
 declare const SecureSessionPlugin: FastifyPlugin<SecureSessionPluginOptions>;

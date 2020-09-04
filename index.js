@@ -78,7 +78,7 @@ module.exports = fp(function (fastify, options, next) {
       const cookie = request.cookies[cookieName]
       if (cookie === undefined) {
         // there is no cookie
-        request.log.debug('fastify-secure-session: there is no cookie, creating an empty session')
+        if (!options.muteLogs) { request.log.debug('fastify-secure-session: there is no cookie, creating an empty session') }
         request.session = new Session({})
         next()
         return
@@ -91,7 +91,7 @@ module.exports = fp(function (fastify, options, next) {
 
       if (split.length <= 1) {
         // the cookie is malformed
-        request.log.debug('fastify-secure-session: the cookie is malformed, creating an empty session')
+        if (!options.muteLogs) { request.log.debug('fastify-secure-session: the cookie is malformed, creating an empty session') }
         request.session = new Session({})
         next()
         return
@@ -102,7 +102,7 @@ module.exports = fp(function (fastify, options, next) {
 
       if (cipher.length < sodium.crypto_secretbox_MACBYTES) {
         // not long enough
-        request.log.debug('fastify-secure-session: the cipher is not long enough, creating an empty session')
+        if (!options.muteLogs) { request.log.debug('fastify-secure-session: the cipher is not long enough, creating an empty session') }
         request.session = new Session({})
         next()
         return
@@ -110,7 +110,7 @@ module.exports = fp(function (fastify, options, next) {
 
       if (nonce.length !== sodium.crypto_secretbox_NONCEBYTES) {
         // the length is not correct
-        request.log.debug('fastify-secure-session: the nonce does not have the required length, creating an empty session')
+        if (!options.muteLogs) { request.log.debug('fastify-secure-session: the nonce does not have the required length, creating an empty session') }
         request.session = new Session({})
         next()
         return
@@ -129,7 +129,7 @@ module.exports = fp(function (fastify, options, next) {
 
       if (!decodeSuccess) {
         // unable to decrypt
-        request.log.debug('fastify-secure-session: unable to decrypt, creating an empty session')
+        if (!options.muteLogs) { request.log.debug('fastify-secure-session: unable to decrypt, creating an empty session') }
         request.session = new Session({})
         next()
         return
@@ -149,18 +149,18 @@ module.exports = fp(function (fastify, options, next) {
 
       if (!session || !session.changed) {
         // nothing to do
-        request.log.debug('fastify-secure-session: there is no session or the session didn\'t change, leaving it as is')
+        if (!options.muteLogs) { request.log.debug('fastify-secure-session: there is no session or the session didn\'t change, leaving it as is') }
         next()
         return
       } else if (session.deleted) {
-        request.log.debug('fastify-secure-session: deleting session')
+        if (!options.muteLogs) { request.log.debug('fastify-secure-session: deleting session') }
         const tmpCookieOptions = Object.assign({}, cookieOptions, { expires: new Date(0), maxAge: 0 })
         reply.setCookie(cookieName, '', tmpCookieOptions)
         next()
         return
       }
 
-      request.log.debug('fastify-secure-session: setting session')
+      if (!options.muteLogs) { request.log.debug('fastify-secure-session: setting session') }
       const nonce = genNonce()
       const msg = Buffer.from(JSON.stringify(session[kObj]))
 
