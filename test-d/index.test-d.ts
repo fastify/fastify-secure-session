@@ -22,3 +22,10 @@ app.get("/not-websockets", async (request, reply) => {
   request.session.get("foo");
   request.session.delete();
 });
+
+expectType<Session | null>(app.decodeSecureSession("some cookie"))
+let session = app.createSecureSession({foo: 'bar'});
+expectType<Session>(session);
+session = app.createSecureSession();
+expectType<Session>(session);
+expectType<string>(app.encodeSecureSession(session))

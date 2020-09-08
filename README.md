@@ -172,6 +172,21 @@ time the older session is decoded will be a little more expensive though.
 
 For a full "start to finish" example without having to generate keys and setup a server file, see the *second* test case in the test file at `/test/key-rotation.js` in this repo.
 
+## Integrating with other libraries
+
+If you need to encode or decode a session in related systems (like say `fastify-websockets`, which doesn't use normal Fastify `Request` objects), you can use `fastify-secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle tested by the community, but the option is there if you need it.
+
+```js
+fastify.createSecureSession({foo: 'bar'})
+// => Session returns a session object for manipulating with .get and .set to then be encoded with encodeSecureSession
+
+fastify.encodeSecureSession(request.session)
+// => "abcdefg" returns the signed and encrypted cookie string, suitable for passing to a Set-Cookie header
+
+fastify.decodeSecureSession(request.cookies['session'])
+// => Session | null  returns a session object which you can use to .get values from if decoding is successful, and null otherwise
+```
+
 ## TODO
 
 * [ ] add an option to just sign, and do not encrypt

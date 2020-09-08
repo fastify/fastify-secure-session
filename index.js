@@ -65,6 +65,73 @@ module.exports = fp(function (fastify, options, next) {
   // TODO verify if it helps the perf
   fastify.decorateRequest('session', null)
 
+  fastify.decorate('decodeSecureSession', (cookie, log = fastify.log) => {
+    if (cookie === undefined) {
+      // there is no cookie
+      log.debug('fastify-secure-session: there is no cookie, creating an empty session')
+      return null
+    }
+
+    // do not use destructuring or it will deopt
+    const split = cookie.split(';')
+    const cyphertextB64 = split[0]
+    const nonceB64 = split[1]
+
+    if (split.length <= 1) {
+      // the cookie is malformed
+      log.debug('fastify-secure-session: the cookie is malformed, creating an empty session')
+      return null
+    }
+
+    const cipher = Buffer.from(cyphertextB64, 'base64')
+    const nonce = Buffer.from(nonceB64, 'base64')
+
+    if (cipher.length < sodium.crypto_secretbox_MACBYTES) {
+      // not long enough
+      log.debug('fastify-secure-session: the cipher is not long enough, creating an empty session')
+      return null
+    }
+
+    if (nonce.length !== sodium.crypto_secretbox_NONCEBYTES) {
+      // the length is not correct
+      log.debug('fastify-secure-session: the nonce does not have the required length, creating an empty session')
+      return null
+    }
+
+    const msg = Buffer.allocUnsafe(cipher.length - sodium.crypto_secretbox_MACBYTES)
+
+    let signingKeyRotated = false
+    const decodeSuccess = key.some((k, i) => {
+      const decoded = sodium.crypto_secretbox_open_easy(msg, cipher, nonce, k)
+
+      signingKeyRotated = decoded && i > 0
+
+      return decoded
+    })
+
+    if (!decodeSuccess) {
+      // unable to decrypt
+      log.debug('fastify-secure-session: unable to decrypt, creating an empty session')
+      return null
+    }
+
+    const session = new Session(JSON.parse(msg))
+    session.changed = signingKeyRotated
+    return session
+  })
+
+  fastify.decorate('createSecureSession', (data) => new Session(data))
+
+  fastify.decorate('encodeSecureSession', (session) => {
+    const nonce = genNonce()
+    const msg = Buffer.from(JSON.stringify(session[kObj]))
+
+    const cipher = Buffer.allocUnsafe(msg.length + sodium.crypto_secretbox_MACBYTES)
+    sodium.crypto_secretbox_easy(cipher, msg, nonce, key[0])
+
+    return cipher.toString('base64') + ';' + nonce.toString('base64')
+  })
+
   fastify
     .register(require('fastify-cookie'))
     .register(fp(addHooks))
@@ -74,77 +141,15 @@ module.exports = fp(function (fastify, options, next) {
   function addHooks (fastify, options, next) {
     // the hooks must be registered after fastify-cookie hooks
 
-    fastify.addHook('onRequest', function decodeSession (request, reply, next) {
+    fastify.addHook('onRequest', (request, reply, next) => {
       const cookie = request.cookies[cookieName]
-      if (cookie === undefined) {
-        // there is no cookie
-        request.log.debug('fastify-secure-session: there is no cookie, creating an empty session')
-        request.session = new Session({})
-        next()
-        return
-      }
-
-      // do not use destructuring or it will deopt
-      const split = cookie.split(';')
-      const cyphertextB64 = split[0]
-      const nonceB64 = split[1]
-
-      if (split.length <= 1) {
-        // the cookie is malformed
-        request.log.debug('fastify-secure-session: the cookie is malformed, creating an empty session')
-        request.session = new Session({})
-        next()
-        return
-      }
-
-      const cipher = Buffer.from(cyphertextB64, 'base64')
-      const nonce = Buffer.from(nonceB64, 'base64')
-
-      if (cipher.length < sodium.crypto_secretbox_MACBYTES) {
-        // not long enough
-        request.log.debug('fastify-secure-session: the cipher is not long enough, creating an empty session')
-        request.session = new Session({})
-        next()
-        return
-      }
-
-      if (nonce.length !== sodium.crypto_secretbox_NONCEBYTES) {
-        // the length is not correct
-        request.log.debug('fastify-secure-session: the nonce does not have the required length, creating an empty session')
-        request.session = new Session({})
-        next()
-        return
-      }
-
-      const msg = Buffer.allocUnsafe(cipher.length - sodium.crypto_secretbox_MACBYTES)
-
-      let signingKeyRotated = false
-      const decodeSuccess = key.some((k, i) => {
-        const decoded = sodium.crypto_secretbox_open_easy(msg, cipher, nonce, k)
-
-        signingKeyRotated = decoded && i > 0
-
-        return decoded
-      })
-
-      if (!decodeSuccess) {
-        // unable to decrypt
-        request.log.debug('fastify-secure-session: unable to decrypt, creating an empty session')
-        request.session = new Session({})
-        next()
-        return
-      }
-
-      request.session = new Session(JSON.parse(msg))
-
-      if (signingKeyRotated) {
-        request.session.changed = true
-      }
+      const result = fastify.decodeSecureSession(cookie, request.log)
+      request.session = result || new Session({})
 
       next()
     })
 
-    fastify.addHook('onSend', function encodeSession (request, reply, payload, next) {
+    fastify.addHook('onSend', (request, reply, payload, next) => {
       const session = request.session
 
       if (!session || !session.changed) {
@@ -161,13 +166,8 @@ module.exports = fp(function (fastify, options, next) {
       }
 
       request.log.debug('fastify-secure-session: setting session')
-      const nonce = genNonce()
-      const msg = Buffer.from(JSON.stringify(session[kObj]))
+      reply.setCookie(cookieName, fastify.encodeSecureSession(session), cookieOptions)
 
-      const cipher = Buffer.allocUnsafe(msg.length + sodium.crypto_secretbox_MACBYTES)
-      sodium.crypto_secretbox_easy(cipher, msg, nonce, key[0])
-
-      reply.setCookie(cookieName, cipher.toString('base64') + ';' + nonce.toString('base64'), cookieOptions)
       next()
     })
 

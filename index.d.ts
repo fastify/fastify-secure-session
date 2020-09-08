@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { CookieSerializeOptions } from "fastify-cookie";
-import { FastifyPlugin } from "fastify";
+import { FastifyPlugin, FastifyLoggerInstance } from "fastify";
 
 export interface Session {
   changed: boolean;
@@ -22,6 +22,12 @@ declare const SecureSessionPlugin: FastifyPlugin<SecureSessionPluginOptions>;
 export default SecureSessionPlugin;
 
 declare module "fastify" {
+  interface FastifyInstance {
+    createSecureSession(data?: Record<string, any>): Session
+    decodeSecureSession(cookie: string, log?: FastifyLoggerInstance): Session | null
+    encodeSecureSession(session: Session): string
+  }
+
   interface FastifyRequest {
     session: Session;
   }
