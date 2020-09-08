@@ -120,6 +120,8 @@ module.exports = fp(function (fastify, options, next) {
     return session
   })
 
+  fastify.decorate('createSecureSession', (data) => new Session(data))
+
   fastify.decorate('encodeSecureSession', (session) => {
     const nonce = genNonce()
     const msg = Buffer.from(JSON.stringify(session[kObj]))
@@ -197,8 +199,6 @@ class Session {
     this.deleted = true
   }
 }
-
-module.exports.Session = Session
 
 function genNonce () {
   var buf = Buffer.allocUnsafe(sodium.crypto_secretbox_NONCEBYTES)

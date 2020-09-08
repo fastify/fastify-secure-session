@@ -2,7 +2,7 @@
 import { CookieSerializeOptions } from "fastify-cookie";
 import { FastifyPlugin, FastifyLoggerInstance } from "fastify";
 
-export class Session {
+export interface Session {
   changed: boolean;
   deleted: boolean;
   get(key: string): any;
@@ -23,6 +23,7 @@ export default SecureSessionPlugin;
 
 declare module "fastify" {
   interface FastifyInstance {
+    createSecureSession(data?: Record<string, any>): Session
     decodeSecureSession(cookie: string, log?: FastifyLoggerInstance): Session | null
     encodeSecureSession(session: Session): string
   }
