@@ -12,6 +12,7 @@ export interface Session {
 
 export type SecureSessionPluginOptions = {
   cookie?: CookieSerializeOptions
+  cookieName?: string
 } & ({key: string | Buffer | (string | Buffer)[]} | {
   secret: string | Buffer,
   salt: string | Buffer
