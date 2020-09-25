@@ -22,6 +22,8 @@ const fs = require('fs')
 const path = require('path')
 
 fastify.register(require('fastify-secure-session'), {
+  // the name of the session cookie, defaults to 'session'
+  cookieName: 'my-seession-cookie',
   // adapt this to point to the directory where secret-key is located
   key: fs.readFileSync(path.join(__dirname, 'secret-key')),
   cookie: {
