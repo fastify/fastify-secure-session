@@ -23,7 +23,7 @@ const path = require('path')
 
 fastify.register(require('fastify-secure-session'), {
   // the name of the session cookie, defaults to 'session'
-  cookieName: 'my-seession-cookie',
+  cookieName: 'my-session-cookie',
   // adapt this to point to the directory where secret-key is located
   key: fs.readFileSync(path.join(__dirname, 'secret-key')),
   cookie: {
@@ -173,6 +173,19 @@ with the key at the first index the next time they are seen by the application, 
 time the older session is decoded will be a little more expensive though.
 
 For a full "start to finish" example without having to generate keys and setup a server file, see the *second* test case in the test file at `/test/key-rotation.js` in this repo.
+
+## Configuring cookie options inside a route
+
+You can configure the options for `setCookie` inside a route by using the `session.options()` method.
+
+```js
+fastify.post('/', (request, reply) => {
+  request.session.set('data', request.body)
+  // .options takes any parameter that you can pass to setCookie
+  request.session.options({ maxAge: 1000 * 60 * 60 })
+  reply.send('hello world')
+})
+```
 
 ## Integrating with other libraries
 
