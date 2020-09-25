@@ -8,6 +8,7 @@ const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 sodium.randombytes_buf(key)
 
 fastify.register(require('../'), {
+  cookieName: 'foobar',
   key
 })
 
@@ -39,7 +40,7 @@ fastify.inject({
   t.equal(response.statusCode, 200)
   t.ok(response.headers['set-cookie'])
   const { name } = response.cookies[0]
-  t.equal(name, 'session')
+  t.equal(name, 'foobar')
 
   fastify.inject({
     method: 'GET',
