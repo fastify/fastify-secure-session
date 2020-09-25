@@ -21,6 +21,7 @@ app.get("/not-websockets", async (request, reply) => {
   request.session.set("foo", "bar");
   request.session.get("foo");
   request.session.delete();
+  request.session.options({ maxAge: 42 })
 });
 
 expectType<Session | null>(app.decodeSecureSession("some cookie"))

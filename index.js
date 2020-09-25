@@ -3,6 +3,7 @@
 const fp = require('fastify-plugin')
 const sodium = require('sodium-native')
 const kObj = Symbol('object')
+const kCookieOptions = Symbol('cookie options')
 
 module.exports = fp(function (fastify, options, next) {
   var key
@@ -159,14 +160,23 @@ module.exports = fp(function (fastify, options, next) {
         return
       } else if (session.deleted) {
         request.log.debug('fastify-secure-session: deleting session')
-        const tmpCookieOptions = Object.assign({}, cookieOptions, { expires: new Date(0), maxAge: 0 })
+        const tmpCookieOptions = Object.assign(
+          {},
+          cookieOptions,
+          session[kCookieOptions],
+          { expires: new Date(0), maxAge: 0 }
+        )
         reply.setCookie(cookieName, '', tmpCookieOptions)
         next()
         return
       }
 
       request.log.debug('fastify-secure-session: setting session')
-      reply.setCookie(cookieName, fastify.encodeSecureSession(session), cookieOptions)
+      reply.setCookie(
+        cookieName,
+        fastify.encodeSecureSession(session),
+        Object.assign({}, cookieOptions, session[kCookieOptions])
+      )
 
       next()
     })
@@ -181,6 +191,7 @@ module.exports = fp(function (fastify, options, next) {
 class Session {
   constructor (obj) {
     this[kObj] = obj
+    this[kCookieOptions] = null
     this.changed = false
     this.deleted = false
   }
@@ -197,6 +208,10 @@ class Session {
   delete () {
     this.changed = true
     this.deleted = true
+  }
+
+  options (opts) {
+    this[kCookieOptions] = opts
   }
 }
 

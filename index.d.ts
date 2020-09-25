@@ -8,6 +8,7 @@ export interface Session {
   get(key: string): any;
   set(key: string, value: any): void;
   delete(): void;
+  options(opts: CookieSerializeOptions): void;
 }
 
 export type SecureSessionPluginOptions = {
