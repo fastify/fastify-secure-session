@@ -27,6 +27,7 @@ fastify.register(require('fastify-secure-session'), {
   // adapt this to point to the directory where secret-key is located
   key: fs.readFileSync(path.join(__dirname, 'secret-key')),
   cookie: {
+    path: '/'
     // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
@@ -68,6 +69,7 @@ fastify.register(require('fastify-secure-session'), {
   secret: 'averylogphrasebiggerthanthirtytwochars',
   salt: 'mq9hDxBVDbspDR6n',
   cookie: {
+    path: '/'
     // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
@@ -103,6 +105,7 @@ fastify.register(require('fastify-secure-session'), {
   key: [mySecureKey]
 
   cookie: {
+    path: '/'
     // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
@@ -116,6 +119,7 @@ fastify.register(require('fastify-secure-session'), {
   key: [myNewKey, mySecureKey]
 
   cookie: {
+    path: '/'
     // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
@@ -142,6 +146,7 @@ fastify.register(require('fastify-secure-session'), {
   key: [key1, key2],
 
   cookie: {
+    path: '/'
     // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
