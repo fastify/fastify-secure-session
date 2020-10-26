@@ -56,6 +56,23 @@ If you enable [`debug` logging](https://www.fastify.io/docs/latest/Logging/),
 you will see what steps the library is doing and understand why a session you
 expect to be there is not present.
 
+### Using keys as strings
+You can convert your key file to a hexadecimal string. This is useful in scenarios where you'd rather load the key from an environment variable instead of deploying a file.
+
+To convert a key file into a hexadecimal string you can do this in an npm script:
+```js
+const keyBuffer = fs.readFileSync(path.join(__dirname, 'secret-key'));
+const hexString = keyBuffer.toString('hex'));
+console.log(hexString) // Outputs: 4fe91796c30bd989d95b62dc46c7c3ba0b6aa2df2187400586a4121c54c53b85
+```
+
+To use your hexadecimal string with this plugin you'd need convert it back into a Buffer:
+```js
+fastify.register(require('fastify-secure-session'), {
+  key: Buffer.from(process.env.COOKIE_KEY, 'hex')
+})
+```
+
 ## Using a secret
 
 It's possible to generate a high-entropy key from a (low-entropy)
