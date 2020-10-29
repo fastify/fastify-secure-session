@@ -31,7 +31,7 @@
     "cookie": "^0.4.0",
     "fastify": "^3.0.0",
     "pre-commit": "^1.2.2",
-    "standard": "^15.0.0",
+    "standard": "^16.0.0",
     "tap": "^14.10.7",
     "tsd": "^0.13.1",
     "typescript": "^4.0.2"
