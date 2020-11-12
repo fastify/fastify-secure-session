@@ -2,13 +2,16 @@
   "name": "fastify-secure-session",
   "version": "2.3.0",
   "description": "Create a secure stateless cookie session for Fastify",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "bin": {
-    "secure-session-gen-key": "genkey.js"
+    "secure-session-gen-key": "lib/bin/genkey.js"
   },
   "scripts": {
-    "test": "standard && tap test/*.js && tsd"
+    "build": "tsc --build",
+    "test": "standard && tap test/*.js && tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "prettycheck": "prettier --check 'src/'"
   },
   "repository": {
     "type": "git",
@@ -27,18 +30,21 @@
   },
   "homepage": "https://github.com/fastify/fastify-secure-session#readme",
   "devDependencies": {
-    "@types/node": "^14.0.23",
-    "cookie": "^0.4.0",
-    "fastify": "^3.0.0",
+    "@tsconfig/node10": "^1.0.7",
+    "@types/node": "^14.14.7",
+    "@types/sodium-native": "^2.3.5",
+    "cookie": "^0.4.1",
+    "fastify": "^3.8.0",
     "pre-commit": "^1.2.2",
-    "standard": "^16.0.1",
-    "tap": "^14.10.7",
+    "prettier": "^2.1.2",
+    "standard": "^16.0.2",
+    "tap": "^14.10.8",
     "tsd": "^0.13.1",
-    "typescript": "^4.0.2"
+    "typescript": "^4.0.5"
   },
   "dependencies": {
-    "fastify-cookie": "^4.0.2",
-    "fastify-plugin": "^2.0.0",
-    "sodium-native": "^3.0.0"
+    "fastify-cookie": "^4.1.0",
+    "fastify-plugin": "^3.0.0",
+    "sodium-native": "^3.2.0"
   }
 }
