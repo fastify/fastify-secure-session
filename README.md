@@ -57,9 +57,11 @@ you will see what steps the library is doing and understand why a session you
 expect to be there is not present.
 
 ### Using keys as strings
+
 You can convert your key file to a hexadecimal string. This is useful in scenarios where you'd rather load the key from an environment variable instead of deploying a file.
 
 To convert a key file into a hexadecimal string you can do this in an npm script:
+
 ```js
 const keyBuffer = fs.readFileSync(path.join(__dirname, 'secret-key'));
 const hexString = keyBuffer.toString('hex'));
@@ -67,11 +69,17 @@ console.log(hexString) // Outputs: 4fe91796c30bd989d95b62dc46c7c3ba0b6aa2df21874
 ```
 
 To use your hexadecimal string with this plugin you'd need convert it back into a Buffer:
+
 ```js
 fastify.register(require('fastify-secure-session'), {
   key: Buffer.from(process.env.COOKIE_KEY, 'hex')
 })
 ```
+
+#### Security
+
+- Although the example reads the key from a file on disk, it is not a best practice when it comes to security. Ideally you should store secret/keys into a key management service like Vault, KMS or something similar and read them at run-time.
+- Use `httpOnly` session cookie for all production purposes to reduce the risk of session highjacking or XSS.
 
 ## Using a secret
 
@@ -86,7 +94,8 @@ fastify.register(require('fastify-secure-session'), {
   secret: 'averylogphrasebiggerthanthirtytwochars',
   salt: 'mq9hDxBVDbspDR6n',
   cookie: {
-    path: '/'
+    path: '/',
+    httpOnly: true // Use httpOnly for all production purposes
     // options for setCookie, see https://github.com/fastify/fastify-cookie
   }
 })
@@ -114,7 +123,7 @@ It's possible to use an array for the key field to support key rotation as an ad
 Cookies will always be signed with the first key in the array to try to "err on the side of performance" however
 if decoding the key fails, it will attempt to decode using every subsequent value in the key array.
 
-IMPORTANT: The new key you are trying to rotate to should always be the first key in the array.  For example:
+IMPORTANT: The new key you are trying to rotate to should always be the first key in the array. For example:
 
 ```js
 // first time running the app
@@ -127,9 +136,11 @@ fastify.register(require('fastify-secure-session'), {
   }
 })
 ```
-The above example will sign and encrypt/decrypt sessions just fine.  But what if you want an extra security measure of
-being able to rotate your secret credentials for your application?  This library supports this by allowing you to
+
+The above example will sign and encrypt/decrypt sessions just fine. But what if you want an extra security measure of
+being able to rotate your secret credentials for your application? This library supports this by allowing you to
 do the following:
+
 ```js
 // first time running the app
 fastify.register(require('fastify-secure-session'), {
@@ -141,10 +152,12 @@ fastify.register(require('fastify-secure-session'), {
   }
 })
 ```
-See that `myNewKey` was added to the first index postion in the key array.  This allows any sessions that were created
+
+See that `myNewKey` was added to the first index postion in the key array. This allows any sessions that were created
 with the original `mySecureKey` to still be decoded. The first time a session signed with an older key is "seen", by the application, this library will re-sign the cookie with the newest session key therefore improving performance for any subsequent session decodes.
 
 To see a full working example, make sure you generate `secret-key1` and `secret-key2` alongside the js file below by running:
+
 ```
 ./node_modules/.bin/secure-session-gen-key > secret-key1
 ./node_modules/.bin/secure-session-gen-key > secret-key2
@@ -189,12 +202,12 @@ fastify.listen(3000)
 
 WARNING: The more keys you have in the key array can make the decode operation get expensive if too many keys are used.
 at once. It is recommended to only use 2 keys at a given time so that the most decode attempts will ever be is 2.
-This should allow ample support time for supporting sessions with an old key while rotating to the new one.  If you have
-really long lived sessions it could be possible to need to support 3 or even 4 keys.  Since old sessions are re-signed
-with the key at the first index the next time they are seen by the application, you can get away with this.  That first
+This should allow ample support time for supporting sessions with an old key while rotating to the new one. If you have
+really long lived sessions it could be possible to need to support 3 or even 4 keys. Since old sessions are re-signed
+with the key at the first index the next time they are seen by the application, you can get away with this. That first
 time the older session is decoded will be a little more expensive though.
 
-For a full "start to finish" example without having to generate keys and setup a server file, see the *second* test case in the test file at `/test/key-rotation.js` in this repo.
+For a full "start to finish" example without having to generate keys and setup a server file, see the _second_ test case in the test file at `/test/key-rotation.js` in this repo.
 
 ## Configuring cookie options inside a route
 
@@ -214,7 +227,7 @@ fastify.post('/', (request, reply) => {
 If you need to encode or decode a session in related systems (like say `fastify-websockets`, which doesn't use normal Fastify `Request` objects), you can use `fastify-secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle tested by the community, but the option is there if you need it.
 
 ```js
-fastify.createSecureSession({foo: 'bar'})
+fastify.createSecureSession({ foo: 'bar' })
 // => Session returns a session object for manipulating with .get and .set to then be encoded with encodeSecureSession
 
 fastify.encodeSecureSession(request.session)
@@ -226,7 +239,7 @@ fastify.decodeSecureSession(request.cookies['session'])
 
 ## TODO
 
-* [ ] add an option to just sign, and do not encrypt
+- [ ] add an option to just sign, and do not encrypt
 
 ## License
 
