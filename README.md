@@ -52,9 +52,10 @@ fastify.post('/logout', (request, reply) => {
 })
 ```
 
-If you enable [`debug` logging](https://www.fastify.io/docs/latest/Logging/),
+If you enable [`debug` level logging](https://www.fastify.io/docs/latest/Logging/),
 you will see what steps the library is doing and understand why a session you
-expect to be there is not present.
+expect to be there is not present. For extra details, you can also enable `trace`
+level logging.
 
 ### Using keys as strings
 

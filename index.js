@@ -69,7 +69,7 @@ module.exports = fp(function (fastify, options, next) {
   fastify.decorate('decodeSecureSession', (cookie, log = fastify.log) => {
     if (cookie === undefined) {
       // there is no cookie
-      log.debug('fastify-secure-session: there is no cookie, creating an empty session')
+      log.trace('fastify-secure-session: there is no cookie, creating an empty session')
       return null
     }
 
@@ -155,7 +155,7 @@ module.exports = fp(function (fastify, options, next) {
 
       if (!session || !session.changed) {
         // nothing to do
-        request.log.debug('fastify-secure-session: there is no session or the session didn\'t change, leaving it as is')
+        request.log.trace('fastify-secure-session: there is no session or the session didn\'t change, leaving it as is')
         next()
         return
       } else if (session.deleted) {
@@ -171,7 +171,7 @@ module.exports = fp(function (fastify, options, next) {
         return
       }
 
-      request.log.debug('fastify-secure-session: setting session')
+      request.log.trace('fastify-secure-session: setting session')
       reply.setCookie(
         cookieName,
         fastify.encodeSecureSession(session),
