@@ -65,7 +65,7 @@ To convert a key file into a hexadecimal string you can do this in an npm script
 
 ```js
 const keyBuffer = fs.readFileSync(path.join(__dirname, 'secret-key'));
-const hexString = keyBuffer.toString('hex'));
+const hexString = keyBuffer.toString('hex');
 console.log(hexString) // Outputs: 4fe91796c30bd989d95b62dc46c7c3ba0b6aa2df2187400586a4121c54c53b85
 ```
 
