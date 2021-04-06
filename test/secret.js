@@ -16,7 +16,7 @@ tap.test('using secret without salt', function (t) {
     reply.send('hello world')
   })
 
-  t.tearDown(fastify.close.bind(fastify))
+  t.teardown(fastify.close.bind(fastify))
   t.plan(5)
 
   fastify.get('/', (request, reply) => {
@@ -47,7 +47,7 @@ tap.test('using secret without salt', function (t) {
       }
     }, (error, response) => {
       t.error(error)
-      t.deepEqual(JSON.parse(response.payload), {
+      t.same(JSON.parse(response.payload), {
         some: 'data'
       })
     })
@@ -69,7 +69,7 @@ tap.test('using secret with salt as string', function (t) {
     reply.send('hello world')
   })
 
-  t.tearDown(fastify.close.bind(fastify))
+  t.teardown(fastify.close.bind(fastify))
   t.plan(5)
 
   fastify.get('/', (request, reply) => {
@@ -100,7 +100,7 @@ tap.test('using secret with salt as string', function (t) {
       }
     }, (error, response) => {
       t.error(error)
-      t.deepEqual(JSON.parse(response.payload), {
+      t.same(JSON.parse(response.payload), {
         some: 'data'
       })
     })
@@ -122,7 +122,7 @@ tap.test('using secret with salt as buffer', function (t) {
     reply.send('hello world')
   })
 
-  t.tearDown(fastify.close.bind(fastify))
+  t.teardown(fastify.close.bind(fastify))
   t.plan(5)
 
   fastify.get('/', (request, reply) => {
@@ -153,7 +153,7 @@ tap.test('using secret with salt as buffer', function (t) {
       }
     }, (error, response) => {
       t.error(error)
-      t.deepEqual(JSON.parse(response.payload), {
+      t.same(JSON.parse(response.payload), {
         some: 'data'
       })
     })
