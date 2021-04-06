@@ -6,7 +6,7 @@ const kObj = Symbol('object')
 const kCookieOptions = Symbol('cookie options')
 
 module.exports = fp(function (fastify, options, next) {
-  var key
+  let key
   if (options.secret) {
     if (Buffer.byteLength(options.secret) < 32) {
       return next(new Error('secret must be at least 32 bytes'))
@@ -16,7 +16,7 @@ module.exports = fp(function (fastify, options, next) {
 
     // static salt to be used for key derivation, not great for security,
     // but better than nothing
-    var salt = Buffer.from('mq9hDxBVDbspDR6nLfFT1g==', 'base64')
+    let salt = Buffer.from('mq9hDxBVDbspDR6nLfFT1g==', 'base64')
 
     if (options.salt) {
       salt = (Buffer.isBuffer(options.salt)) ? options.salt : Buffer.from(options.salt, 'ascii')
@@ -216,7 +216,7 @@ class Session {
 }
 
 function genNonce () {
-  var buf = Buffer.allocUnsafe(sodium.crypto_secretbox_NONCEBYTES)
+  const buf = Buffer.allocUnsafe(sodium.crypto_secretbox_NONCEBYTES)
   sodium.randombytes_buf(buf)
   return buf
 }
