@@ -30,7 +30,7 @@ fastify.post('/delete', (request, reply) => {
   reply.send('hello world')
 })
 
-t.tearDown(fastify.close.bind(fastify))
+t.teardown(fastify.close.bind(fastify))
 t.plan(14)
 
 fastify.get('/', (request, reply) => {
@@ -66,7 +66,7 @@ fastify.inject({
     }
   }, (error, response) => {
     t.error(error)
-    t.deepEqual(JSON.parse(response.payload), { some: 'someData', some2: { a: 1, c: 3 } })
+    t.same(JSON.parse(response.payload), { some: 'someData', some2: { a: 1, c: 3 } })
 
     fastify.inject({
       method: 'POST',

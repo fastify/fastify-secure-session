@@ -16,7 +16,7 @@ fastify.post('/', (request, reply) => {
   reply.send('hello world')
 })
 
-t.tearDown(fastify.close.bind(fastify))
+t.teardown(fastify.close.bind(fastify))
 t.plan(5)
 
 fastify.get('/', (request, reply) => {
@@ -47,6 +47,6 @@ fastify.inject({
     }
   }, (error, response) => {
     t.error(error)
-    t.deepEqual(JSON.parse(response.payload), { some: 'data' })
+    t.same(JSON.parse(response.payload), { some: 'data' })
   })
 })

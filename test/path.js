@@ -15,7 +15,7 @@ fastify.register(require('../'), {
   }
 })
 
-t.tearDown(fastify.close.bind(fastify))
+t.teardown(fastify.close.bind(fastify))
 t.plan(4)
 
 fastify.post('/auth', (request, reply) => {

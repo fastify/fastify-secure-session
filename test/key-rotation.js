@@ -8,7 +8,7 @@ const fastifySecureSession = require('..')
 tap.test('support string key array', async t => {
   const fastify = Fastify({ logger: false })
 
-  t.tearDown(fastify.close.bind(fastify))
+  t.teardown(fastify.close.bind(fastify))
   t.plan(5)
 
   const key1 = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
@@ -54,7 +54,7 @@ tap.test('support string key array', async t => {
     }
   })
 
-  t.deepEqual(JSON.parse(getResponse.payload), payload)
+  t.same(JSON.parse(getResponse.payload), payload)
 
   const getResponseNewKey = await fastify.inject({
     method: 'GET',
@@ -65,13 +65,13 @@ tap.test('support string key array', async t => {
   })
 
   t.equal(getResponseNewKey.statusCode, 200)
-  t.deepEqual(JSON.parse(getResponseNewKey.payload), payload)
+  t.same(JSON.parse(getResponseNewKey.payload), payload)
 })
 
 tap.test('support key rotation with buffer key array', async t => {
   let fastify = Fastify({ logger: false })
 
-  t.tearDown(fastify.close.bind(fastify))
+  t.teardown(fastify.close.bind(fastify))
   t.plan(5)
 
   const key1 = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
@@ -117,7 +117,7 @@ tap.test('support key rotation with buffer key array', async t => {
     }
   })
 
-  t.deepEqual(JSON.parse(getResponse.payload), payload)
+  t.same(JSON.parse(getResponse.payload), payload)
 
   // restart fastify to switch key order (rotation)
   await fastify.close()
@@ -146,5 +146,5 @@ tap.test('support key rotation with buffer key array', async t => {
   })
 
   t.equal(getResponseNewKey.statusCode, 200)
-  t.deepEqual(JSON.parse(getResponseNewKey.payload), payload)
+  t.same(JSON.parse(getResponseNewKey.payload), payload)
 })

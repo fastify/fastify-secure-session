@@ -20,7 +20,7 @@ t.test('Custom options', t => {
     reply.send('hello world')
   })
 
-  t.tearDown(fastify.close.bind(fastify))
+  t.teardown(fastify.close.bind(fastify))
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
@@ -52,7 +52,7 @@ t.test('Custom options', t => {
       }
     }, (error, response) => {
       t.error(error)
-      t.deepEqual(JSON.parse(response.payload), { some: 'data' })
+      t.same(JSON.parse(response.payload), { some: 'data' })
     })
   })
 })
@@ -74,7 +74,7 @@ t.test('Override global options', t => {
     reply.send('hello world')
   })
 
-  t.tearDown(fastify.close.bind(fastify))
+  t.teardown(fastify.close.bind(fastify))
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
@@ -107,7 +107,7 @@ t.test('Override global options', t => {
       }
     }, (error, response) => {
       t.error(error)
-      t.deepEqual(JSON.parse(response.payload), { some: 'data' })
+      t.same(JSON.parse(response.payload), { some: 'data' })
     })
   })
 })
