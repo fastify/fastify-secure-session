@@ -64,7 +64,7 @@ level logging.
 
 ### Using keys as strings
 
-You can convert your key file to a hexadecimal string. This is useful in scenarios where you'd rather load the key from an environment variable instead of deploying a file.
+You can convert your key file to a hexadecimal string. This is useful in scenarios where you would rather load the key from an environment variable instead of deploying a file.
 
 To convert a key file into a hexadecimal string you can do this in an npm script:
 
@@ -74,7 +74,7 @@ const hexString = keyBuffer.toString('hex');
 console.log(hexString) // Outputs: 4fe91796c30bd989d95b62dc46c7c3ba0b6aa2df2187400586a4121c54c53b85
 ```
 
-To use your hexadecimal string with this plugin you'd need convert it back into a Buffer:
+To use your hexadecimal string with this plugin you would need convert it back into a Buffer:
 
 ```js
 fastify.register(require('fastify-secure-session'), {
@@ -84,12 +84,12 @@ fastify.register(require('fastify-secure-session'), {
 
 #### Security
 
-- Although the example reads the key from a file on disk, it is not a best practice when it comes to security. Ideally you should store secret/keys into a key management service like Vault, KMS or something similar and read them at run-time.
+- Although the example reads the key from a file on disk, it is poor practice when it comes to security. Ideally, you should store secret/keys into a key management service like Vault, KMS or something similar and read them at run-time.
 - Use `httpOnly` session cookie for all production purposes to reduce the risk of session highjacking or XSS.
 
 ## Using a secret
 
-It's possible to generate a high-entropy key from a (low-entropy)
+It is possible to generate a high-entropy key from a (low-entropy)
 secret passphrase. This approach is the simplest to use, but it adds
 a significant startup delay as strong cryptography is applied.
 
@@ -125,7 +125,7 @@ fastify.listen(3000)
 
 ## Using Keys with key rotation
 
-It's possible to use an array for the key field to support key rotation as an additional security measure.
+It is possible to use an array for the key field to support key rotation as an additional security measure.
 Cookies will always be signed with the first key in the array to try to "err on the side of performance" however
 if decoding the key fails, it will attempt to decode using every subsequent value in the key array.
 
@@ -143,7 +143,7 @@ fastify.register(require('fastify-secure-session'), {
 })
 ```
 
-The above example will sign and encrypt/decrypt sessions just fine. But what if you want an extra security measure of
+The above example will sign and encrypt/decrypt sessions just fine. However, what if you want an extra security measure of
 being able to rotate your secret credentials for your application? This library supports this by allowing you to
 do the following:
 
@@ -230,7 +230,7 @@ fastify.post('/', (request, reply) => {
 
 ## Integrating with other libraries
 
-If you need to encode or decode a session in related systems (like say `fastify-websockets`, which doesn't use normal Fastify `Request` objects), you can use `fastify-secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle tested by the community, but the option is there if you need it.
+If you need to encode or decode a session in related systems (like say `fastify-websockets`, which does not use normal Fastify `Request` objects), you can use `fastify-secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle tested by the community, but the option is there if you need it.
 
 ```js
 fastify.createSecureSession({ foo: 'bar' })
