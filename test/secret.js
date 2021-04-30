@@ -175,3 +175,21 @@ tap.test('plugin should propagate error when fed a secret that is shorter than 3
     t.equal(err instanceof Error, true)
   })
 })
+tap.test('plugin should propagate error when fed a salt that is shorter than sodium.crypto_pwhash_SALTBYTES', function (t) {
+  t.plan(2)
+
+  const secureSession = t.mock('..', {
+    'fastify-plugin': function (secureSession) {
+      return secureSession
+    }
+  })
+  const sodium = require('sodium-native')
+
+  const secret = 'averylogphrasebiggerthanthirtytwochars'
+  const shortSalt = Buffer.from('mq9hDxBVDbsp', 'ascii')
+
+  secureSession({}, { secret: secret, salt: shortSalt }, function next (err) {
+    t.equal(err instanceof Error, true)
+    t.equal(err.message, `salt must be length ${sodium.crypto_pwhash_SALTBYTES}`)
+  })
+})
