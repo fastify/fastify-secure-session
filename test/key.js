@@ -17,7 +17,7 @@ fastify.post('/', (request, reply) => {
 })
 
 t.teardown(fastify.close.bind(fastify))
-t.plan(9)
+t.plan(10)
 
 fastify.get('/', (request, reply) => {
   const data = request.session.get('data')
@@ -54,7 +54,7 @@ fastify.inject({
 })
 
 t.test('plugin should propagate error when given a key that is not an array, string, or buffer', t => {
-  t.plan(2)
+  t.plan(1)
 
   const secureSession = t.mock('..', {
     'fastify-plugin': (secureSession) => {
@@ -64,12 +64,11 @@ t.test('plugin should propagate error when given a key that is not an array, str
 
   secureSession({}, { key: 13 }, (err) => {
     t.equal(err instanceof Error, true)
-    t.equal(err.message, 'key must be a string or a Buffer')
   })
 })
 
 t.test('plugin should propagate an error when given a string/buffer key that is shorter than sodium.crypto_secretbox_KEYBYTES', t => {
-  t.plan(2)
+  t.plan(1)
 
   const secureSession = t.mock('..', {
     'fastify-plugin': (secureSession) => {
@@ -79,7 +78,6 @@ t.test('plugin should propagate an error when given a string/buffer key that is 
 
   secureSession({}, { key: Buffer.alloc(sodium.crypto_secretbox_KEYBYTES - 1) }, (err) => {
     t.equal(err instanceof Error, true)
-    t.equal(err.message, `key must be at least ${sodium.crypto_secretbox_KEYBYTES} bytes`)
   })
 })
 
@@ -98,5 +96,23 @@ t.test('plugin should propagate an error when given a key array that contains ke
     (err) => {
       t.equal(err instanceof Error, true)
       t.equal(err.message, `key lengths must be at least ${sodium.crypto_secretbox_KEYBYTES} bytes`)
+    })
+})
+
+t.test('plugin should propagate an error when neither a key or a secret was specified', t => {
+  t.plan(2)
+
+  const secureSession = t.mock('..', {
+    'fastify-plugin': (secureSession) => {
+      return secureSession
+    }
+  })
+
+  secureSession(
+    {},
+    {},
+    (err) => {
+      t.equal(err instanceof Error, true)
+      t.equal(err.message, 'key or secret must specified')
     })
 })
