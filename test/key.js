@@ -17,7 +17,7 @@ fastify.post('/', (request, reply) => {
 })
 
 t.teardown(fastify.close.bind(fastify))
-t.plan(6)
+t.plan(7)
 
 fastify.get('/', (request, reply) => {
   const data = request.session.get('data')
@@ -50,5 +50,20 @@ fastify.inject({
   }, (error, response) => {
     t.error(error)
     t.same(JSON.parse(response.payload), { some: 'data' })
+  })
+})
+
+t.test('plugin should propagate error when given a key that is not an array, string, or buffer', t => {
+  t.plan(2)
+
+  const secureSession = t.mock('..', {
+    'fastify-plugin': (secureSession) => {
+      return secureSession
+    }
+  })
+
+  secureSession({}, { key: 13 }, (err) => {
+    t.equal(err instanceof Error, true)
+    t.equal(err.message, 'key must be a string or a Buffer')
   })
 })
