@@ -159,3 +159,19 @@ tap.test('using secret with salt as buffer', function (t) {
     })
   })
 })
+
+tap.test('plugin should propagate error when fed a secret that is shorter than 32 bytes', function (t) {
+  t.plan(1)
+
+  const secureSession = t.mock('..', {
+    'fastify-plugin': function (secureSession) {
+      return secureSession
+    }
+  })
+
+  const shortSecret = Buffer.alloc(16)
+
+  secureSession({}, { secret: shortSecret }, function next (err) {
+    t.equal(err instanceof Error, true)
+  })
+})
