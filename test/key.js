@@ -17,7 +17,7 @@ fastify.post('/', (request, reply) => {
 })
 
 t.teardown(fastify.close.bind(fastify))
-t.plan(10)
+t.plan(11)
 
 fastify.get('/', (request, reply) => {
   const data = request.session.get('data')
@@ -115,4 +115,27 @@ t.test('plugin should propagate an error when neither a key or a secret was spec
       t.equal(err instanceof Error, true)
       t.equal(err.message, 'key or secret must specified')
     })
+})
+
+t.test('plugin should synchronously throw an error when given a key array with none string keys', t => {
+  t.plan(1)
+
+  const secureSession = t.mock('..', {
+    'fastify-plugin': (secureSession) => {
+      return secureSession
+    }
+  })
+
+  t.throws(
+    callPlugin,
+    {}
+  )
+
+  // **********************
+  function callPlugin () {
+    secureSession(
+      {},
+      { key: [Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES), 12, Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)] }
+    )
+  }
 })
