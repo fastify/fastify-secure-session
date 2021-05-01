@@ -46,6 +46,9 @@ test('decodeSecureSession should return null if cipher cannot be decrypted', asy
   const firstKey = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
   const secondKey = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
 
+  sodium.randombytes_buf(firstKey)
+  sodium.randombytes_buf(secondKey)
+
   // Creating the initial instance to get a cookie
   // signed by the first key
   let app = createApp(firstKey)
