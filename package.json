@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "bin": {
-    "secure-session-gen-key": "genkey.js"
+    "fastify-secure-session": "genkey.js"
   },
   "scripts": {
     "test": "standard && tap test/*.js && tsd"

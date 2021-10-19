@@ -13,8 +13,14 @@ and [fastify-cookie](https://github.com/fastify/fastify-cookie).
 
 First generate a key with:
 
+```sh
+npx fastify-secure-session > secret-key
 ```
-./node_modules/.bin/secure-session-gen-key > secret-key
+
+If running in Windows Powershell, you should use this command instead:
+
+```sh
+npx fastify-secure-session | Out-File -Encoding default -NoNewline -FilePath secret-key
 ```
 
 Then, register the plugin as follows:
