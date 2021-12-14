@@ -121,9 +121,11 @@ module.exports = fp(function (fastify, options, next) {
     if (session[kObj].state) {
       const stateKey = session[kObj].state.key
       session[stateKey] = { state: session[kObj].state.value }
+      session.changed = true
+    } else {
+      session.changed = signingKeyRotated
     }
 
-    session.changed = signingKeyRotated
     return session
   })
 
