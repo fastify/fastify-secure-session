@@ -117,6 +117,12 @@ module.exports = fp(function (fastify, options, next) {
     }
 
     const session = new Session(JSON.parse(msg))
+
+    if (session[kObj].state) {
+      const stateKey = session[kObj].state.key
+      session[stateKey] = { state: session[kObj].state.value }
+    }
+
     session.changed = signingKeyRotated
     return session
   })
@@ -125,6 +131,15 @@ module.exports = fp(function (fastify, options, next) {
 
   fastify.decorate('encodeSecureSession', (session) => {
     const nonce = genNonce()
+
+    // store state
+    for (const [key, value] of Object.entries(session)) {
+      if (key.startsWith('oauth')) {
+        session[kObj].state = { key, value: value.state }
+        break
+      }
+    }
+
     const msg = Buffer.from(JSON.stringify(session[kObj]))
 
     const cipher = Buffer.allocUnsafe(msg.length + sodium.crypto_secretbox_MACBYTES)
@@ -153,7 +168,8 @@ module.exports = fp(function (fastify, options, next) {
     fastify.addHook('onSend', (request, reply, payload, next) => {
       const session = request.session
 
-      if (!session || !session.changed) {
+      const hasState = session && Object.values(session).some(v => (typeof v === 'object' && !!v.state))
+      if (!session || (!session.changed && !hasState)) {
         // nothing to do
         request.log.trace('fastify-secure-session: there is no session or the session didn\'t change, leaving it as is')
         next()
