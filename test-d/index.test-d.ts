@@ -14,12 +14,19 @@ app.register(SecureSessionPlugin, { key: Buffer.from("foo") });
 app.register(SecureSessionPlugin, { key: ["foo", "bar"] });
 app.register(SecureSessionPlugin, { secret: "foo", salt: "bar" });
 
+declare module "../index" {
+  interface SessionData {
+    foo: string;
+  }
+}
+
 app.get("/not-websockets", async (request, reply) => {
   expectType<FastifyRequest>(request);
   expectType<FastifyReply>(reply);
   expectType<Session>(request.session);
   request.session.set("foo", "bar");
-  request.session.get("foo");
+  expectType<string | undefined>(request.session.get("foo"));
+  expectType<any>(request.session.get("baz"));
   request.session.delete();
   request.session.options({ maxAge: 42 })
 });

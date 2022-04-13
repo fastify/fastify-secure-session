@@ -5,10 +5,14 @@ import { FastifyPlugin, FastifyLoggerInstance } from "fastify";
 export interface Session {
   changed: boolean;
   deleted: boolean;
-  get(key: string): any;
-  set(key: string, value: any): void;
+  get<Key extends keyof SessionData>(key: Key): SessionData[Key] | undefined;
+  set<Key extends keyof SessionData>(key: Key, value: SessionData[Key] | undefined): void;
   delete(): void;
   options(opts: CookieSerializeOptions): void;
+}
+
+export interface SessionData {
+  [key: string]: any;
 }
 
 export type SecureSessionPluginOptions = {

@@ -249,6 +249,23 @@ fastify.decodeSecureSession(request.cookies['session'])
 // => Session | null  returns a session object which you can use to .get values from if decoding is successful, and null otherwise
 ```
 
+## Add TypeScript types
+
+The session data is typed as `{ [key: string]: any }`. This can be extended with [declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html) to get improved type support.
+
+```ts
+declare module 'fastify-secure-session' {
+  interface SessionData {
+    foo: string;
+  }
+}
+
+fastify.get('/', (request, reply) => {
+  request.session.get('foo'); // typed `string | undefined`
+  reply.send('hello world')
+})
+```
+
 ## TODO
 
 - [ ] add an option to just sign, and do not encrypt
