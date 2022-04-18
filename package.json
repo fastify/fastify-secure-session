@@ -28,7 +28,7 @@
   "homepage": "https://github.com/fastify/fastify-secure-session#readme",
   "devDependencies": {
     "@types/node": "^17.0.2",
-    "cookie": "^0.4.0",
+    "cookie": "^0.5.0",
     "fastify": "^3.0.0",
     "pre-commit": "^1.2.2",
     "standard": "^16.0.1",
