@@ -68,6 +68,9 @@ you will see what steps the library is doing and understand why a session you
 expect to be there is not present. For extra details, you can also enable `trace`
 level logging.
 
+Note: instead of using `get` and `set` as seen above, you may also wish to get and set properties on the
+session object natively in order to make your code compatible with other libraries ie `request.session.data = rquest.body` and `const data = request.session.data` are also possible.
+
 ### Using keys as strings
 
 You can convert your key file to a hexadecimal string. This is useful in scenarios where you would rather load the key from an environment variable instead of deploying a file.

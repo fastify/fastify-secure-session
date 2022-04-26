@@ -16,6 +16,8 @@ t.test('it exposes encode and decode decorators for other libraries to use', asy
   const session = fastify.createSecureSession({ foo: 'bar' })
   t.equal(session.get('foo'), 'bar')
   t.type(session.get('somethingElse'), 'undefined')
+  t.equal(session.foo, 'bar')
+  t.type(session.somethingElse, 'undefined')
 
   t.ok(fastify.encodeSecureSession(fastify.createSecureSession({ foo: 'bar' })))
   t.ok(fastify.encodeSecureSession(fastify.createSecureSession({})))
@@ -25,6 +27,8 @@ t.test('it exposes encode and decode decorators for other libraries to use', asy
   const decoded = fastify.decodeSecureSession(cookie)
   t.equal(decoded.get('foo'), 'bar')
   t.type(decoded.get('somethingElse'), 'undefined')
+  t.equal(decoded.foo, 'bar')
+  t.type(decoded.somethingElse, 'undefined')
 
   t.equal(fastify.decodeSecureSession('bogus'), null)
 })

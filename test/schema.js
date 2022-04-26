@@ -23,6 +23,7 @@ const schema = {
 
 fastify.post('/', { schema }, (request, reply) => {
   request.session.set('data', request.body)
+  request.session.data2 = request.body
   reply.send('hello world')
 })
 

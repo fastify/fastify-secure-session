@@ -13,16 +13,28 @@ fastify.register(require('../'), {
 
 fastify.get('/get', (request, reply) => {
   const data = request.session.get('data')
-  reply.send(data)
+  const data2 = request.session.data
+  reply.send({ data, data2 })
 })
 
 fastify.get('/set', (request, reply) => {
+  request.session.set('data', { hello: 'world' })
+  request.session.data2 = { hello: 'world' }
+  reply.send('hello world')
+})
+
+fastify.get('/get2', (request, reply) => {
+  const data = request.session.get('data')
+  reply.send(data)
+})
+
+fastify.get('/set2', (request, reply) => {
   request.session.set('data', { hello: 'world' })
   reply.send('hello world')
 })
 
 t.teardown(fastify.close.bind(fastify))
-t.plan(5)
+t.plan(10)
 
 fastify.inject({
   method: 'GET',
@@ -35,6 +47,28 @@ fastify.inject({
   fastify.inject({
     method: 'GET',
     url: '/get',
+    cookies: {
+      [cookie.name]: cookie.value + 'a'.repeat(10)
+    }
+  }, (error, response) => {
+    t.error(error)
+    t.equal(response.statusCode, 200)
+    // the session is empty, so we expect an empty string
+    t.equal(response.payload, '{}')
+  })
+})
+
+fastify.inject({
+  method: 'GET',
+  url: '/set2'
+}, (error, response) => {
+  t.error(error)
+  t.equal(response.statusCode, 200)
+  const cookie = response.cookies[0]
+
+  fastify.inject({
+    method: 'GET',
+    url: '/get2',
     cookies: {
       [cookie.name]: cookie.value + 'a'.repeat(10)
     }

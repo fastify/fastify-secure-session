@@ -14,14 +14,20 @@ fastify.register(require('../'), {
   key,
   cookie: {
     path: '/',
-    expires: expires,
+    expires,
     maxAge: 86400
   }
 })
 
 fastify.post('/', (request, reply) => {
+  // using setters
   request.session.set('some', request.body.some)
   request.session.set('some2', request.body.some2)
+
+  // setting natively
+  request.session.set('some3', request.body.some3)
+  request.session.set('some4', request.body.some4)
+
   reply.send('hello world')
 })
 
@@ -36,11 +42,13 @@ t.plan(14)
 fastify.get('/', (request, reply) => {
   const some = request.session.get('some')
   const some2 = request.session.get('some2')
-  if (!some || !some2) {
+  const some3 = request.session.get('some3')
+  const some4 = request.session.get('some4')
+  if (!some || !some2 || !some3 || !some4) {
     reply.code(404).send()
     return
   }
-  reply.send({ some: some, some2: some2 })
+  reply.send({ some, some2, some3, some4 })
 })
 
 fastify.inject({
@@ -48,7 +56,9 @@ fastify.inject({
   url: '/',
   payload: {
     some: 'someData',
-    some2: { a: 1, b: undefined, c: 3 }
+    some2: { a: 1, b: undefined, c: 3 },
+    some3: { test1: true },
+    some4: { test2: true }
   }
 }, (error, response) => {
   t.error(error)
@@ -66,7 +76,10 @@ fastify.inject({
     }
   }, (error, response) => {
     t.error(error)
-    t.same(JSON.parse(response.payload), { some: 'someData', some2: { a: 1, c: 3 } })
+    t.same(
+      JSON.parse(response.payload),
+      { some: 'someData', some2: { a: 1, c: 3 }, some3: { test1: true }, some4: { test2: true } }
+    )
 
     fastify.inject({
       method: 'POST',

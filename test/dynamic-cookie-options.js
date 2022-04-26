@@ -15,7 +15,10 @@ t.test('Custom options', t => {
   })
 
   fastify.post('/', (request, reply) => {
+    // test both setter and natively setting
     request.session.set('data', request.body)
+    request.session.data2 = request.body
+
     request.session.options({ maxAge: 1000 * 60 * 60 })
     reply.send('hello world')
   })
@@ -24,11 +27,13 @@ t.test('Custom options', t => {
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
-    if (!data) {
+    const data2 = request.session.data2
+
+    if (!data || !data2) {
       reply.code(404).send()
       return
     }
-    reply.send(data)
+    reply.send({ data, data2 })
   })
 
   fastify.inject({
@@ -52,7 +57,7 @@ t.test('Custom options', t => {
       }
     }, (error, response) => {
       t.error(error)
-      t.same(JSON.parse(response.payload), { some: 'data' })
+      t.same(JSON.parse(response.payload), { data: { some: 'data' }, data2: { some: 'data' } })
     })
   })
 })
@@ -70,6 +75,8 @@ t.test('Override global options', t => {
 
   fastify.post('/', (request, reply) => {
     request.session.set('data', request.body)
+    request.session.data2 = request.body
+
     request.session.options({ maxAge: 1000 * 60 * 60 })
     reply.send('hello world')
   })
@@ -78,11 +85,13 @@ t.test('Override global options', t => {
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
-    if (!data) {
+    const data2 = request.session.data2
+
+    if (!data || !data2) {
       reply.code(404).send()
       return
     }
-    reply.send(data)
+    reply.send({ data, data2 })
   })
 
   fastify.inject({
@@ -107,7 +116,7 @@ t.test('Override global options', t => {
       }
     }, (error, response) => {
       t.error(error)
-      t.same(JSON.parse(response.payload), { some: 'data' })
+      t.same(JSON.parse(response.payload), { data: { some: 'data' }, data2: { some: 'data' } })
     })
   })
 })

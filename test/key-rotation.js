@@ -23,16 +23,18 @@ tap.test('support string key array', async t => {
 
   fastify.post('/', (request, reply) => {
     request.session.set('data', request.body)
+    request.session.data2 = request.body
     reply.send('hello world')
   })
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
-    if (!data) {
+    const data2 = request.session.data2
+    if (!data || !data2) {
       reply.code(404).send()
       return
     }
-    reply.send(data)
+    reply.send({ data, data2 })
   })
 
   const payload = { some: 'data' }
@@ -54,7 +56,7 @@ tap.test('support string key array', async t => {
     }
   })
 
-  t.same(JSON.parse(getResponse.payload), payload)
+  t.same(JSON.parse(getResponse.payload), { data: payload, data2: payload })
 
   const getResponseNewKey = await fastify.inject({
     method: 'GET',
@@ -65,7 +67,7 @@ tap.test('support string key array', async t => {
   })
 
   t.equal(getResponseNewKey.statusCode, 200)
-  t.same(JSON.parse(getResponseNewKey.payload), payload)
+  t.same(JSON.parse(getResponseNewKey.payload), { data: payload, data2: payload })
 })
 
 tap.test('support key rotation with buffer key array', async t => {
