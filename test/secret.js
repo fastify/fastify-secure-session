@@ -28,34 +28,30 @@ tap.test('using secret without salt', function (t) {
     reply.send(data)
   })
 
-  fastify.inject(
-    {
-      method: 'POST',
-      url: '/',
-      payload: {
-        some: 'data'
-      }
-    },
-    (error, response) => {
-      t.error(error)
-      t.equal(response.statusCode, 200)
-      t.ok(response.headers['set-cookie'])
-
-      fastify.inject(
-        {
-          method: 'GET',
-          url: '/',
-          headers: {
-            cookie: response.headers['set-cookie']
-          }
-        },
-        (error, response) => {
-          t.error(error)
-          t.same(JSON.parse(response.payload), { some: 'data' })
-        }
-      )
+  fastify.inject({
+    method: 'POST',
+    url: '/',
+    payload: {
+      some: 'data'
     }
-  )
+  }, (error, response) => {
+    t.error(error)
+    t.equal(response.statusCode, 200)
+    t.ok(response.headers['set-cookie'])
+
+    fastify.inject({
+      method: 'GET',
+      url: '/',
+      headers: {
+        cookie: response.headers['set-cookie']
+      }
+    }, (error, response) => {
+      t.error(error)
+      t.same(JSON.parse(response.payload), {
+        some: 'data'
+      })
+    })
+  })
 })
 
 tap.test('using secret with salt as string', function (t) {
@@ -104,7 +100,9 @@ tap.test('using secret with salt as string', function (t) {
       }
     }, (error, response) => {
       t.error(error)
-      t.same(JSON.parse(response.payload), { some: 'data' })
+      t.same(JSON.parse(response.payload), {
+        some: 'data'
+      })
     })
   })
 })
@@ -155,7 +153,9 @@ tap.test('using secret with salt as buffer', function (t) {
       }
     }, (error, response) => {
       t.error(error)
-      t.same(JSON.parse(response.payload), { some: 'data' })
+      t.same(JSON.parse(response.payload), {
+        some: 'data'
+      })
     })
   })
 })
