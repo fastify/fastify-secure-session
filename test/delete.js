@@ -20,14 +20,7 @@ fastify.register(require('../'), {
 })
 
 fastify.post('/', (request, reply) => {
-  // using setters
   request.session.set('some', request.body.some)
-  request.session.set('some2', request.body.some2)
-
-  // setting natively
-  request.session.some3 = request.body.some3
-  request.session.some4 = request.body.some4
-
   reply.send('hello world')
 })
 
@@ -41,24 +34,18 @@ t.plan(14)
 
 fastify.get('/', (request, reply) => {
   const some = request.session.get('some')
-  const some2 = request.session.get('some2')
-  const some3 = request.session.get('some3')
-  const some4 = request.session.get('some4')
-  if (!some || !some2 || !some3 || !some4) {
+  if (!some) {
     reply.code(404).send()
     return
   }
-  reply.send({ some, some2, some3, some4 })
+  reply.send({ some })
 })
 
 fastify.inject({
   method: 'POST',
   url: '/',
   payload: {
-    some: 'someData',
-    some2: { a: 1, b: undefined, c: 3 },
-    some3: { test1: true },
-    some4: { test2: true }
+    some: 'someData'
   }
 }, (error, response) => {
   t.error(error)
@@ -78,7 +65,7 @@ fastify.inject({
     t.error(error)
     t.same(
       JSON.parse(response.payload),
-      { some: 'someData', some2: { a: 1, c: 3 }, some3: { test1: true }, some4: { test2: true } }
+      { some: 'someData' }
     )
 
     fastify.inject({

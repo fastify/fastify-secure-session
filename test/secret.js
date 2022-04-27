@@ -13,7 +13,6 @@ tap.test('using secret without salt', function (t) {
 
   fastify.post('/', (request, reply) => {
     request.session.set('data', request.body)
-    request.session.data2 = request.body
     reply.send('hello world')
   })
 
@@ -22,12 +21,11 @@ tap.test('using secret without salt', function (t) {
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
-    const data2 = request.session.data2
-    if (!data || !data2) {
+    if (!data) {
       reply.code(404).send()
       return
     }
-    reply.send({ data, data2 })
+    reply.send(data)
   })
 
   fastify.inject(
@@ -53,14 +51,7 @@ tap.test('using secret without salt', function (t) {
         },
         (error, response) => {
           t.error(error)
-          t.same(JSON.parse(response.payload), {
-            data: {
-              some: 'data'
-            },
-            data2: {
-              some: 'data'
-            }
-          })
+          t.same(JSON.parse(response.payload), { some: 'data' })
         }
       )
     }
@@ -79,7 +70,6 @@ tap.test('using secret with salt as string', function (t) {
 
   fastify.post('/', (request, reply) => {
     request.session.set('data', request.body)
-    request.session.data2 = request.body
     reply.send('hello world')
   })
 
@@ -88,12 +78,11 @@ tap.test('using secret with salt as string', function (t) {
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
-    const data2 = request.session.data2
-    if (!data || !data2) {
+    if (!data) {
       reply.code(404).send()
       return
     }
-    reply.send({ data, data2 })
+    reply.send(data)
   })
 
   fastify.inject({
@@ -115,14 +104,7 @@ tap.test('using secret with salt as string', function (t) {
       }
     }, (error, response) => {
       t.error(error)
-      t.same(JSON.parse(response.payload), {
-        data: {
-          some: 'data'
-        },
-        data2: {
-          some: 'data'
-        }
-      })
+      t.same(JSON.parse(response.payload), { some: 'data' })
     })
   })
 })
@@ -139,7 +121,6 @@ tap.test('using secret with salt as buffer', function (t) {
 
   fastify.post('/', (request, reply) => {
     request.session.set('data', request.body)
-    request.session.data2 = request.body
     reply.send('hello world')
   })
 
@@ -148,12 +129,11 @@ tap.test('using secret with salt as buffer', function (t) {
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
-    const data2 = request.session.data2
-    if (!data || !data2) {
+    if (!data) {
       reply.code(404).send()
       return
     }
-    reply.send({ data, data2 })
+    reply.send(data)
   })
 
   fastify.inject({
@@ -175,14 +155,7 @@ tap.test('using secret with salt as buffer', function (t) {
       }
     }, (error, response) => {
       t.error(error)
-      t.same(JSON.parse(response.payload), {
-        data: {
-          some: 'data'
-        },
-        data2: {
-          some: 'data'
-        }
-      })
+      t.same(JSON.parse(response.payload), { some: 'data' })
     })
   })
 })
