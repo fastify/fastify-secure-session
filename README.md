@@ -69,7 +69,7 @@ expect to be there is not present. For extra details, you can also enable `trace
 level logging.
 
 Note: instead of using `get` and `set` as seen above, you may also wish to get and set properties on the
-session object natively in order to make your code compatible with other libraries ie `request.session.data = rquest.body` and `const data = request.session.data` are also possible.
+session object natively in order to make your code compatible with other libraries ie `request.session.data = request.body` and `const data = request.session.data` are also possible.
 
 ### Using keys as strings
 
