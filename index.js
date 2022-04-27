@@ -8,7 +8,7 @@ const kCookieOptions = Symbol('cookie options')
 // allows us to directly get and set properties as well as using getters and setters
 const sessionProxyHandler = {
   get (target, prop) {
-    // Calling functions eg request.session.get('key') or request.session.get('key', 'value')
+    // Calling functions eg request.session.get('key') or request.session.set('key', 'value')
     if (typeof target[prop] === 'function') {
       return new Proxy(target[prop], {
         apply (applyTarget, thisArg, args) {
