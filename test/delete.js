@@ -25,8 +25,8 @@ fastify.post('/', (request, reply) => {
   request.session.set('some2', request.body.some2)
 
   // setting natively
-  request.session.set('some3', request.body.some3)
-  request.session.set('some4', request.body.some4)
+  request.session.some3 = request.body.some3
+  request.session.some4 = request.body.some4
 
   reply.send('hello world')
 })
