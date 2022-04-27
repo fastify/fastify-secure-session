@@ -5,6 +5,32 @@ const sodium = require('sodium-native')
 const kObj = Symbol('object')
 const kCookieOptions = Symbol('cookie options')
 
+// allows us to use property getters and setters as well as get and set methods on session object
+const sessionProxyHandler = {
+  get (target, prop) {
+    // Calling functions eg request.session.get('key') or request.session.set('key', 'value')
+    if (typeof target[prop] === 'function') {
+      return new Proxy(target[prop], {
+        apply (applyTarget, thisArg, args) {
+          return Reflect.apply(applyTarget, target, args)
+        }
+      })
+    }
+
+    // Accessing properties eg request.session.changed
+    if (Object.prototype.hasOwnProperty.call(target, prop)) {
+      return target[prop]
+    }
+
+    // accessing session property
+    return target.get(prop)
+  },
+  set (target, prop, value) {
+    target.set(prop, value)
+    return true
+  }
+}
+
 module.exports = fp(function (fastify, options, next) {
   let key
   if (options.secret) {
@@ -116,12 +142,12 @@ module.exports = fp(function (fastify, options, next) {
       return null
     }
 
-    const session = new Session(JSON.parse(msg))
+    const session = new Proxy(new Session(JSON.parse(msg)), sessionProxyHandler)
     session.changed = signingKeyRotated
     return session
   })
 
-  fastify.decorate('createSecureSession', (data) => new Session(data))
+  fastify.decorate('createSecureSession', (data) => new Proxy(new Session(data), sessionProxyHandler))
 
   fastify.decorate('encodeSecureSession', (session) => {
     const nonce = genNonce()
@@ -145,7 +171,8 @@ module.exports = fp(function (fastify, options, next) {
     fastify.addHook('onRequest', (request, reply, next) => {
       const cookie = request.cookies[cookieName]
       const result = fastify.decodeSecureSession(cookie, request.log)
-      request.session = result || new Session({})
+
+      request.session = new Proxy((result || new Session({})), sessionProxyHandler)
 
       next()
     })

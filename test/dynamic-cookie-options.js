@@ -24,6 +24,7 @@ t.test('Custom options', t => {
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
+
     if (!data) {
       reply.code(404).send()
       return
@@ -78,6 +79,7 @@ t.test('Override global options', t => {
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
+
     if (!data) {
       reply.code(404).send()
       return

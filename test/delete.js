@@ -14,7 +14,7 @@ fastify.register(require('../'), {
   key,
   cookie: {
     path: '/',
-    expires: expires,
+    expires,
     maxAge: 86400
   }
 })
@@ -40,7 +40,7 @@ fastify.get('/', (request, reply) => {
     reply.code(404).send()
     return
   }
-  reply.send({ some: some, some2: some2 })
+  reply.send({ some, some2 })
 })
 
 fastify.inject({
