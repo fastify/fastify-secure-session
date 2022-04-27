@@ -1,6 +1,6 @@
 {
-  "name": "fastify-secure-session",
-  "version": "3.1.0",
+  "name": "@fastify/secure-session",
+  "version": "4.0.0",
   "description": "Create a secure stateless cookie session for Fastify",
   "main": "index.js",
   "types": "index.d.ts",
@@ -40,5 +40,8 @@
     "fastify-cookie": "^5.0.0",
     "fastify-plugin": "^3.0.0",
     "sodium-native": "^3.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
