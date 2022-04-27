@@ -5,7 +5,7 @@ const sodium = require('sodium-native')
 const kObj = Symbol('object')
 const kCookieOptions = Symbol('cookie options')
 
-// allows us to directly get and set properties as well as using getters and setters
+// allows us to use property getters and setters as well as get and set methods on session object
 const sessionProxyHandler = {
   get (target, prop) {
     // Calling functions eg request.session.get('key') or request.session.set('key', 'value')
