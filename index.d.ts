@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { CookieSerializeOptions } from "fastify-cookie";
+import { CookieSerializeOptions } from "@fastify/cookie";
 import { FastifyPlugin, FastifyLoggerInstance } from "fastify";
 
 export interface Session {
