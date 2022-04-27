@@ -160,13 +160,13 @@ module.exports = fp(function (fastify, options, next) {
   })
 
   fastify
-    .register(require('fastify-cookie'))
+    .register(require('@fastify/cookie'))
     .register(fp(addHooks))
 
   next()
 
   function addHooks (fastify, options, next) {
-    // the hooks must be registered after fastify-cookie hooks
+    // the hooks must be registered after @fastify/cookie hooks
 
     fastify.addHook('onRequest', (request, reply, next) => {
       const cookie = request.cookies[cookieName]
