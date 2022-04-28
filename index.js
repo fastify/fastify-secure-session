@@ -159,9 +159,10 @@ module.exports = fp(function (fastify, options, next) {
     return cipher.toString('base64') + ';' + nonce.toString('base64')
   })
 
-  fastify
-    .register(require('@fastify/cookie'))
-    .register(fp(addHooks))
+  // temp patch to fixed https://github.com/fastify/fastify-secure-session/issues/99
+  const { registeredPlugins } = require('fastify/lib/pluginUtils')
+  if (!fastify[registeredPlugins].includes('@fastify/cookie')) fastify.register(require('@fastify/cookie'))
+  fastify.register(fp(addHooks))
 
   next()
 
