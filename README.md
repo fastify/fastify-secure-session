@@ -238,7 +238,7 @@ fastify.post('/', (request, reply) => {
 
 ## Integrating with other libraries
 
-If you need to encode or decode a session in related systems (like say `@fastify/websockets`, which does not use normal Fastify `Request` objects), you can use `@fastify/secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle tested by the community, but the option is there if you need it.
+If you need to encode or decode a session in related systems (like say `@fastify/websocket`, which does not use normal Fastify `Request` objects), you can use `@fastify/secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle tested by the community, but the option is there if you need it.
 
 ```js
 fastify.createSecureSession({ foo: 'bar' })
