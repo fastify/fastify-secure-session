@@ -1,26 +1,26 @@
-# fastify-secure-session
+# @fastify/secure-session
 
 ![CI](https://github.com/fastify/fastify-secure-session/workflows/CI/badge.svg)
-[![NPM version](https://img.shields.io/npm/v/fastify-secure-session.svg?style=flat)](https://www.npmjs.com/package/fastify-secure-session)
+[![NPM version](https://img.shields.io/npm/v/@fastify/secure-session.svg?style=flat)](https://www.npmjs.com/package/@fastify/secure-session)
 [![Known Vulnerabilities](https://snyk.io/test/github/fastify/fastify-secure-session/badge.svg)](https://snyk.io/test/github/fastify/fastify-secure-session)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
 
 Create a secure stateless cookie session for Fastify, based on libsodium's
 [Secret Key Box Encryption](https://github.com/sodium-friends/sodium-native#secret-key-box-encryption)
-and [fastify-cookie](https://github.com/fastify/fastify-cookie).
+and [@fastify/cookie](https://github.com/fastify/fastify-cookie).
 
 ## Using a pregenerated key
 
 First generate a key with:
 
 ```sh
-npx fastify-secure-session > secret-key
+npx @fastify/secure-session > secret-key
 ```
 
 If running in Windows Powershell, you should use this command instead:
 
 ```sh
-npx fastify-secure-session | Out-File -Encoding default -NoNewline -FilePath secret-key
+npx @fastify/secure-session | Out-File -Encoding default -NoNewline -FilePath secret-key
 ```
 
 Then, register the plugin as follows:
@@ -32,7 +32,7 @@ const fastify = require('fastify')({ logger: false })
 const fs = require('fs')
 const path = require('path')
 
-fastify.register(require('fastify-secure-session'), {
+fastify.register(require('@fastify/secure-session'), {
   // the name of the session cookie, defaults to 'session'
   cookieName: 'my-session-cookie',
   // adapt this to point to the directory where secret-key is located
@@ -85,7 +85,7 @@ console.log(hexString) // Outputs: 4fe91796c30bd989d95b62dc46c7c3ba0b6aa2df21874
 To use your hexadecimal string with this plugin you would need convert it back into a Buffer:
 
 ```js
-fastify.register(require('fastify-secure-session'), {
+fastify.register(require('@fastify/secure-session'), {
   key: Buffer.from(process.env.COOKIE_KEY, 'hex')
 })
 ```
@@ -104,7 +104,7 @@ a significant startup delay as strong cryptography is applied.
 ```js
 const fastify = require('fastify')({ logger: false })
 
-fastify.register(require('fastify-secure-session'), {
+fastify.register(require('@fastify/secure-session'), {
   secret: 'averylogphrasebiggerthanthirtytwochars',
   salt: 'mq9hDxBVDbspDR6n',
   cookie: {
@@ -141,7 +141,7 @@ IMPORTANT: The new key you are trying to rotate to should always be the first ke
 
 ```js
 // first time running the app
-fastify.register(require('fastify-secure-session'), {
+fastify.register(require('@fastify/secure-session'), {
   key: [mySecureKey]
 
   cookie: {
@@ -157,7 +157,7 @@ do the following:
 
 ```js
 // first time running the app
-fastify.register(require('fastify-secure-session'), {
+fastify.register(require('@fastify/secure-session'), {
   key: [myNewKey, mySecureKey]
 
   cookie: {
@@ -184,7 +184,7 @@ const fastify = require('fastify')({ logger: false })
 const key1 = fs.readFileSync(path.join(__dirname, 'secret-key1'))
 const key2 = fs.readFileSync(path.join(__dirname, 'secret-key2'))
 
-fastify.register(require('fastify-secure-session'), {
+fastify.register(require('@fastify/secure-session'), {
   // any old sessions signed with key2 will still be decoded successfully the first time and
   // then re-signed with key1 to keep good performance with subsequent calls
   key: [key1, key2],
@@ -238,7 +238,7 @@ fastify.post('/', (request, reply) => {
 
 ## Integrating with other libraries
 
-If you need to encode or decode a session in related systems (like say `fastify-websockets`, which does not use normal Fastify `Request` objects), you can use `fastify-secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle tested by the community, but the option is there if you need it.
+If you need to encode or decode a session in related systems (like say `@fastify/websockets`, which does not use normal Fastify `Request` objects), you can use `@fastify/secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle tested by the community, but the option is there if you need it.
 
 ```js
 fastify.createSecureSession({ foo: 'bar' })
@@ -256,7 +256,7 @@ fastify.decodeSecureSession(request.cookies['session'])
 The session data is typed as `{ [key: string]: any }`. This can be extended with [declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html) to get improved type support.
 
 ```ts
-declare module 'fastify-secure-session' {
+declare module '@fastify/secure-session' {
   interface SessionData {
     foo: string;
   }
