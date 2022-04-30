@@ -128,6 +128,16 @@ fastify.get('/', (request, reply) => {
   reply.send(data)
 })
 
+fastify.get('/all', (request, reply) => {
+  // get all data from session
+  const data = request.session.data()
+  if (!data) {
+    reply.code(404).send()
+    return
+  }
+  reply.send(data)
+})
+
 fastify.listen(3000)
 ```
 
