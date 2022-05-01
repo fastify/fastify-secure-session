@@ -65,3 +65,155 @@ t.test('Native gettting and settings props and getter and setter method both wor
     })
   })
 })
+
+t.test('Get all data that we set in session', t => {
+  t.plan(5)
+  const fastify = Fastify()
+  fastify.register(SecureSessionPlugin, {
+    key
+  })
+
+  fastify.post('/', (request, reply) => {
+    request.session.set('data1', request.body)
+    request.session.data2 = request.body
+
+    reply.send('hello world')
+  })
+
+  t.teardown(fastify.close.bind(fastify))
+
+  fastify.get('/', (request, reply) => {
+    const data = request.session.data()
+
+    if (!data) {
+      reply.code(404).send()
+      return
+    }
+
+    reply.send(data)
+  })
+
+  fastify.inject({
+    method: 'POST',
+    url: '/',
+    payload: {
+      some: 'data'
+    }
+  }, (error, response) => {
+    t.error(error)
+    t.equal(response.statusCode, 200)
+    t.ok(response.headers['set-cookie'])
+
+    fastify.inject({
+      method: 'GET',
+      url: '/',
+      headers: {
+        cookie: response.headers['set-cookie']
+      }
+    }, (error, response) => {
+      t.error(error)
+      t.same(JSON.parse(response.payload), {
+        data1: { some: 'data' },
+        data2: { some: 'data' }
+      })
+    })
+  })
+})
+
+t.test('session is changed', t => {
+  t.plan(5)
+  const fastify = Fastify()
+  fastify.register(SecureSessionPlugin, {
+    key
+  })
+
+  fastify.post('/', (request, reply) => {
+    request.session.set('data1', request.body)
+    request.session.data2 = request.body
+
+    reply.send('hello world')
+  })
+
+  t.teardown(fastify.close.bind(fastify))
+
+  fastify.get('/', (request, reply) => {
+    const changed = request.session.changed
+
+    if (!changed) {
+      reply.code(404).send()
+      return
+    }
+
+    reply.send(changed)
+  })
+
+  fastify.inject({
+    method: 'POST',
+    url: '/',
+    payload: {
+      some: 'data'
+    }
+  }, (error, response) => {
+    t.error(error)
+    t.equal(response.statusCode, 200)
+    t.ok(response.headers['set-cookie'])
+
+    fastify.inject({
+      method: 'GET',
+      url: '/',
+      headers: {
+        cookie: response.headers['set-cookie']
+      }
+    }, (error, response) => {
+      t.error(error)
+      t.same(JSON.parse(response.payload), true)
+    })
+  })
+})
+
+t.test('session is deleted', t => {
+  t.plan(5)
+  const fastify = Fastify()
+  fastify.register(SecureSessionPlugin, {
+    key
+  })
+
+  fastify.post('/', (request, reply) => {
+    request.session.set('data1', request.body)
+    request.session.data2 = request.body
+
+    reply.send('hello world')
+  })
+
+  fastify.post('/delete', (request, reply) => {
+    request.session.delete()
+    const deleted = request.session.deleted
+
+    reply.send(deleted)
+  })
+
+  t.teardown(fastify.close.bind(fastify))
+
+  fastify.inject({
+    method: 'POST',
+    url: '/',
+    payload: {
+      some: 'data'
+    }
+  }, (error, response) => {
+    t.error(error)
+    t.equal(response.statusCode, 200)
+    t.ok(response.headers['set-cookie'])
+
+    fastify.inject({
+      method: 'POST',
+      url: '/delete',
+      headers: {
+        cookie: response.headers['set-cookie']
+      }
+    }, (error, response) => {
+      t.error(error)
+      t.same(JSON.parse(response.payload), true)
+    })
+  })
+})

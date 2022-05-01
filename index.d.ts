@@ -7,6 +7,7 @@ export interface Session {
   deleted: boolean;
   get<Key extends keyof SessionData>(key: Key): SessionData[Key] | undefined;
   set<Key extends keyof SessionData>(key: Key, value: SessionData[Key] | undefined): void;
+  data(): SessionData | undefined;
   delete(): void;
   options(opts: CookieSerializeOptions): void;
 }

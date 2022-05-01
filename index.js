@@ -240,6 +240,11 @@ class Session {
   options (opts) {
     this[kCookieOptions] = opts
   }
+
+  data () {
+    const { changed, deleted, ...data } = this[kObj]
+    return data
+  }
 }
 
 function genNonce () {
