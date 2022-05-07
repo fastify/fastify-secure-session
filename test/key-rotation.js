@@ -148,3 +148,16 @@ tap.test('support key rotation with buffer key array', async t => {
   t.equal(getResponseNewKey.statusCode, 200)
   t.same(JSON.parse(getResponseNewKey.payload), payload)
 })
+
+tap.test('does not support an empty key array', async t => {
+  const fastify = Fastify({ logger: false })
+
+  t.teardown(fastify.close.bind(fastify))
+  t.plan(1)
+
+  fastify.register(fastifySecureSession, {
+    key: []
+  })
+
+  await t.rejects(() => fastify.after())
+})
