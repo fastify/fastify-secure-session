@@ -143,7 +143,7 @@ fastify.listen(3000)
 
 ## Using Keys with key rotation
 
-It is possible to use an array for the key field to support key rotation as an additional security measure.
+It is possible to use an non-empty array for the key field to support key rotation as an additional security measure.
 Cookies will always be signed with the first key in the array to try to "err on the side of performance" however
 if decoding the key fails, it will attempt to decode using every subsequent value in the key array.
 
@@ -177,7 +177,7 @@ fastify.register(require('@fastify/secure-session'), {
 })
 ```
 
-See that `myNewKey` was added to the first index postion in the key array. This allows any sessions that were created
+See that `myNewKey` was added to the first index position in the key array. This allows any sessions that were created
 with the original `mySecureKey` to still be decoded. The first time a session signed with an older key is "seen", by the application, this library will re-sign the cookie with the newest session key therefore improving performance for any subsequent session decodes.
 
 To see a full working example, make sure you generate `secret-key1` and `secret-key2` alongside the js file below by running:
