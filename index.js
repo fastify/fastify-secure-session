@@ -211,8 +211,8 @@ module.exports = fp(function (fastify, options, next) {
     next()
   }
 }, {
-  fastify: '3.x',
-  name: 'fastify-secure-session'
+  fastify: '4.x',
+  name: '@fastify/secure-session'
 })
 
 class Session {
