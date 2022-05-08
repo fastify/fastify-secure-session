@@ -2,7 +2,7 @@
 import { CookieSerializeOptions } from "@fastify/cookie";
 import { FastifyPlugin, FastifyLoggerInstance } from "fastify";
 
-export interface Session {
+export type Session = Partial<SessionData> & {
   changed: boolean;
   deleted: boolean;
   get<Key extends keyof SessionData>(key: Key): SessionData[Key] | undefined;
