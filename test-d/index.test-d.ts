@@ -27,7 +27,7 @@ app.get("/not-websockets", async (request, reply) => {
   request.session.set("foo", "bar");
   expectType<string | undefined>(request.session.get("foo"));
   expectType<any>(request.session.get("baz"));
-  expectType<string | undefined>(request.session.foo));
+  expectType<string | undefined>(request.session.foo);
   expectType<any>(request.session.baz);
   expectType<SessionData | undefined>(request.session.data());
   request.session.delete();
