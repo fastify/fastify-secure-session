@@ -70,10 +70,10 @@ module.exports = fp(function (fastify, options, next) {
       return next(new Error('key must be a string or a Buffer'))
     }
 
-    if (!(key instanceof Array) && isBufferKeyLengthValid(key)) {
-      return next(new Error(`key must be at least ${sodium.crypto_secretbox_KEYBYTES} bytes`))
-    } else if (key instanceof Array && key.every(isBufferKeyLengthValid)) {
-      return next(new Error(`key lengths must be at least ${sodium.crypto_secretbox_KEYBYTES} bytes`))
+    if (!(key instanceof Array) && isBufferKeyLengthInvalid(key)) {
+      return next(new Error(`key must be ${sodium.crypto_secretbox_KEYBYTES} bytes`))
+    } else if (key instanceof Array && key.every(isBufferKeyLengthInvalid)) {
+      return next(new Error(`key lengths must be ${sodium.crypto_secretbox_KEYBYTES} bytes`))
     }
   }
 
@@ -265,6 +265,8 @@ function ensureBufferKey (k) {
   return Buffer.from(k, 'base64')
 }
 
-function isBufferKeyLengthValid (k) {
-  return k.length < sodium.crypto_secretbox_KEYBYTES
+function isBufferKeyLengthInvalid (k) {
+  // the key should be strictly equals to sodium.crypto_secretbox_KEYBYTES
+  // or this will result in a runtime error when encoding the session
+  return k.length !== sodium.crypto_secretbox_KEYBYTES
 }
