@@ -1,54 +1,95 @@
 'use strict'
 
-const t = require('tap')
-const fastify = require('fastify')({ logger: false })
+const tap = require('tap')
+const Fastify = require('fastify')
+const fastifySecureSession = require('..')
 const sodium = require('sodium-native')
-const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 
-sodium.randombytes_buf(key)
+tap.test('support key length equals to "crypto_secretbox_KEYBYTES" length', t => {
+  const fastify = Fastify({ logger: false })
+  const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 
-fastify.register(require('../'), {
-  key
-})
+  sodium.randombytes_buf(key)
 
-fastify.post('/', (request, reply) => {
-  request.session.set('data', request.body)
-  reply.send('hello world')
-})
+  fastify.register(fastifySecureSession, {
+    key
+  })
 
-t.teardown(fastify.close.bind(fastify))
-t.plan(6)
+  fastify.post('/', (request, reply) => {
+    request.session.set('data', request.body)
+    reply.send('hello world')
+  })
 
-fastify.get('/', (request, reply) => {
-  const data = request.session.get('data')
-  if (!data) {
-    reply.code(404).send()
-    return
-  }
-  reply.send(data)
-})
+  t.teardown(fastify.close.bind(fastify))
+  t.plan(6)
 
-fastify.inject({
-  method: 'POST',
-  url: '/',
-  payload: {
-    some: 'data'
-  }
-}, (error, response) => {
-  t.error(error)
-  t.equal(response.statusCode, 200)
-  t.ok(response.headers['set-cookie'])
-  const { name } = response.cookies[0]
-  t.equal(name, 'session')
+  fastify.get('/', (request, reply) => {
+    const data = request.session.get('data')
+    if (!data) {
+      reply.code(404).send()
+      return
+    }
+    reply.send(data)
+  })
 
   fastify.inject({
-    method: 'GET',
+    method: 'POST',
     url: '/',
-    headers: {
-      cookie: response.headers['set-cookie']
+    payload: {
+      some: 'data'
     }
   }, (error, response) => {
     t.error(error)
-    t.same(JSON.parse(response.payload), { some: 'data' })
+    t.equal(response.statusCode, 200)
+    t.ok(response.headers['set-cookie'])
+    const { name } = response.cookies[0]
+    t.equal(name, 'session')
+
+    fastify.inject({
+      method: 'GET',
+      url: '/',
+      headers: {
+        cookie: response.headers['set-cookie']
+      }
+    }, (error, response) => {
+      t.error(error)
+      t.same(JSON.parse(response.payload), { some: 'data' })
+    })
   })
+})
+
+tap.test('does not support key length shorter than sodium "crypto_secretbox_KEYBYTES"', async t => {
+  const fastify = Fastify({ logger: false })
+
+  t.teardown(fastify.close.bind(fastify))
+  t.plan(1)
+
+  const arbitraryOffset = 5
+  const keyWithNotEnoughLength = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES - arbitraryOffset)
+
+  sodium.randombytes_buf(keyWithNotEnoughLength)
+
+  fastify.register(fastifySecureSession, {
+    key: keyWithNotEnoughLength
+  })
+
+  await t.rejects(() => fastify.after())
+})
+
+tap.test('does not support key length greater than sodium "crypto_secretbox_KEYBYTES"', async t => {
+  const fastify = Fastify({ logger: false })
+
+  t.teardown(fastify.close.bind(fastify))
+  t.plan(1)
+
+  const arbitraryOffset = 5
+  const keyWithTooMuchLength = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES + arbitraryOffset)
+
+  sodium.randombytes_buf(keyWithTooMuchLength)
+
+  fastify.register(fastifySecureSession, {
+    key: keyWithTooMuchLength
+  })
+
+  await t.rejects(() => fastify.after())
 })

@@ -89,6 +89,8 @@ fastify.register(require('@fastify/secure-session'), {
 })
 ```
 
+Note: `key` must be a secret key of length [crypto_secretbox_KEYBYTES](https://sodium-friends.github.io/docs/docs/secretkeyboxencryption).
+
 #### Security
 
 - Although the example reads the key from a file on disk, it is poor practice when it comes to security. Ideally, you should store secret/keys into a key management service like Vault, KMS or something similar and read them at run-time.
