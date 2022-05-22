@@ -7,7 +7,7 @@ const SecureSessionPlugin = require('../')
 const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 sodium.randombytes_buf(key)
 
-t.test('Native gettting and settings props and getter and setter method both work', t => {
+t.test('Native getting and settings props and getter and setter method both work', t => {
   t.plan(5)
   const fastify = Fastify()
   fastify.register(SecureSessionPlugin, {
