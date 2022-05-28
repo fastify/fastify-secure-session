@@ -19,6 +19,20 @@ tap.test('throws when key is not string nor a Buffer', async t => {
   })
 })
 
+tap.test('throws when key is not specified', async t => {
+  t.plan(2)
+
+  const fastify = Fastify({ logger: false })
+  t.teardown(fastify.close.bind(fastify))
+
+  await fastify.register(fastifySecureSession, {
+    key: undefined
+  }).after(err => {
+    t.type(err, Error)
+    t.equal(err.message, 'key or secret must specified')
+  })
+})
+
 tap.test('support key length equals to "crypto_secretbox_KEYBYTES" length', t => {
   const fastify = Fastify({ logger: false })
   const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
