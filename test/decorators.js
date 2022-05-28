@@ -45,9 +45,37 @@ tap.test('creates an empty session when the cipher is not long enough', async t 
     key
   })
 
-  fastify.decodeSecureSession('a;bb', {
+  const buf = Buffer.alloc(sodium.crypto_secretbox_MACBYTES - 1)
+  sodium.randombytes_buf(buf)
+
+  fastify.decodeSecureSession(`${buf.toString('base64')};`, {
     debug: (msg) => {
       t.equal(msg, 'fastify-secure-session: the cipher is not long enough, creating an empty session')
+    }
+  })
+})
+
+tap.test('creates an empty session when decryption fails', async t => {
+  t.plan(1)
+
+  const fastify = require('fastify')({
+    logger: false
+  })
+  t.teardown(fastify.close.bind(fastify))
+
+  await fastify.register(require('../'), {
+    key
+  })
+
+  const buf = Buffer.alloc(sodium.crypto_secretbox_MACBYTES)
+  sodium.randombytes_buf(buf)
+
+  const buf2 = Buffer.alloc(sodium.crypto_secretbox_NONCEBYTES)
+  sodium.randombytes_buf(buf2)
+
+  fastify.decodeSecureSession(`${buf.toString('base64')};${buf2.toString('base64')}`, {
+    debug: (msg) => {
+      t.equal(msg, 'fastify-secure-session: unable to decrypt, creating an empty session')
     }
   })
 })

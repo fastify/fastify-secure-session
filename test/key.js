@@ -5,6 +5,20 @@ const Fastify = require('fastify')
 const fastifySecureSession = require('..')
 const sodium = require('sodium-native')
 
+tap.test('throws when key is not string array nor a Buffer array', async t => {
+  t.plan(2)
+
+  const fastify = Fastify({ logger: false })
+  t.teardown(fastify.close.bind(fastify))
+
+  await fastify.register(fastifySecureSession, {
+    key: [true]
+  }).after(err => {
+    t.type(err, Error)
+    t.equal(err.message, 'Key must be string or buffer')
+  })
+})
+
 tap.test('throws when key is not string nor a Buffer', async t => {
   t.plan(2)
 

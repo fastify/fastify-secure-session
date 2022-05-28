@@ -65,7 +65,11 @@ module.exports = fp(function (fastify, options, next) {
     if (typeof key === 'string') {
       key = Buffer.from(key, 'base64')
     } else if (key instanceof Array) {
-      key = key.map(ensureBufferKey)
+      try {
+        key = key.map(ensureBufferKey)
+      } catch (error) {
+        return next(error)
+      }
     } else if (!(key instanceof Buffer)) {
       return next(new Error('key must be a string or a Buffer'))
     }
