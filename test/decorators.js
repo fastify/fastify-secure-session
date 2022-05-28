@@ -1,14 +1,18 @@
 'use strict'
 
-const fastify = require('fastify')({ logger: false })
-const t = require('tap')
+const tap = require('tap')
 const sodium = require('sodium-native')
 const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 sodium.randombytes_buf(key)
 
-t.teardown(fastify.close.bind(fastify))
+tap.test('it exposes encode and decode decorators for other libraries to use', async t => {
+  t.plan(8)
 
-t.test('it exposes encode and decode decorators for other libraries to use', async () => {
+  const fastify = require('fastify')({
+    logger: false
+  })
+  t.teardown(fastify.close.bind(fastify))
+
   await fastify.register(require('../'), {
     key
   })
@@ -27,4 +31,23 @@ t.test('it exposes encode and decode decorators for other libraries to use', asy
   t.type(decoded.get('somethingElse'), 'undefined')
 
   t.equal(fastify.decodeSecureSession('bogus'), null)
+})
+
+tap.test('creates an empty session when the cipher is not long enough', async t => {
+  t.plan(1)
+
+  const fastify = require('fastify')({
+    logger: false
+  })
+  t.teardown(fastify.close.bind(fastify))
+
+  await fastify.register(require('../'), {
+    key
+  })
+
+  fastify.decodeSecureSession('a;bb', {
+    debug: (msg) => {
+      t.equal(msg, 'fastify-secure-session: the cipher is not long enough, creating an empty session')
+    }
+  })
 })
