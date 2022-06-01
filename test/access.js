@@ -121,7 +121,7 @@ t.test('Get all data that we set in session', t => {
 })
 
 t.test('session is changed', t => {
-  t.plan(5)
+  t.plan(7)
   const fastify = Fastify()
   fastify.register(SecureSessionPlugin, {
     key
@@ -131,7 +131,14 @@ t.test('session is changed', t => {
     request.session.set('data1', request.body)
     request.session.data2 = request.body
 
-    reply.send('hello world')
+    const changed = request.session.changed
+
+    if (!changed) {
+      reply.code(404).send()
+      return
+    }
+
+    reply.send(changed)
   })
 
   t.teardown(fastify.close.bind(fastify))
@@ -139,8 +146,8 @@ t.test('session is changed', t => {
   fastify.get('/', (request, reply) => {
     const changed = request.session.changed
 
-    if (!changed) {
-      reply.code(404).send()
+    if (changed) { // changed should be false, as session has not been changed here
+      reply.code(500).send()
       return
     }
 
@@ -157,6 +164,7 @@ t.test('session is changed', t => {
     t.error(error)
     t.equal(response.statusCode, 200)
     t.ok(response.headers['set-cookie'])
+    t.same(JSON.parse(response.payload), true)
 
     fastify.inject({
       method: 'GET',
@@ -166,7 +174,8 @@ t.test('session is changed', t => {
       }
     }, (error, response) => {
       t.error(error)
-      t.same(JSON.parse(response.payload), true)
+      t.notOk(response.headers['set-cookie']) // new cookie should not be issued, since session is unchanged
+      t.same(JSON.parse(response.payload), false)
     })
   })
 })
