@@ -67,7 +67,7 @@ you will see what steps the library is doing and understand why a session you
 expect to be there is not present. For extra details, you can also enable `trace`
 level logging.
 
-Note: instead of using the `get` and `set` methods as seen above, you may also wish to use property getters and setters to make your code compatible with other libraries ie `request.session.data = request.body` and `const data = request.session.data` are also possible.
+Note: Instead of using the `get` and `set` methods as seen above, you may also wish to use property getters and setters to make your code compatible with other libraries ie `request.session.data = request.body` and `const data = request.session.data` are also possible. However, if you want to have properties named `changed` or `deleted` in your session data, they can only be accessed via `session.get()` and `session.set()`. (Those are the names of internal properties used by the Session object)
 
 ### Using keys as strings
 
