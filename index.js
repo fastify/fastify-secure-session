@@ -253,8 +253,7 @@ class Session {
   }
 
   data () {
-    const { changed, deleted, ...data } = this[kObj]
-    return data
+    return this[kObj]
   }
 }
 
