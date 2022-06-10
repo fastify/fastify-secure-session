@@ -170,9 +170,14 @@ module.exports = fp(function (fastify, options, next) {
     return cipher.toString('base64') + ';' + nonce.toString('base64')
   })
 
-  fastify
-    .register(require('@fastify/cookie'))
-    .register(fp(addHooks))
+  if (fastify.hasPlugin('@fastify/cookie')) {
+    fastify
+      .register(fp(addHooks))
+  } else {
+    fastify
+      .register(require('@fastify/cookie'))
+      .register(fp(addHooks))
+  }
 
   next()
 
