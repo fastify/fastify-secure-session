@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@fastify/cookie": "^7.0.0",
-    "fastify-plugin": "^3.0.0",
+    "fastify-plugin": "^4.0.0",
     "sodium-native": "^3.0.0"
   },
   "publishConfig": {
