@@ -10,16 +10,17 @@ and [@fastify/cookie](https://github.com/fastify/fastify-cookie).
 
 ## Using a pregenerated key
 
-First generate a key with:
+After you installed `@fastify/secure-session` in your project, you can run `generate-secure-session-key` from your 
+project-folder.
 
 ```sh
-npx @fastify/secure-session > secret-key
+generate-secure-session-key > secret-key
 ```
 
 If running in Windows Powershell, you should use this command instead:
 
 ```sh
-npx @fastify/secure-session | Out-File -Encoding default -NoNewline -FilePath secret-key
+generate-secure-session-key | Out-File -Encoding default -NoNewline -FilePath secret-key
 ```
 
 Then, register the plugin as follows:
