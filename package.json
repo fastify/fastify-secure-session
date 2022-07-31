@@ -8,7 +8,10 @@
     "@fastify/secure-session": "genkey.js"
   },
   "scripts": {
-    "test": "standard && tap test/*.js && tsd"
+    "lint": "standard",
+    "test": "npm run test:unit && npm run test:typescript",
+    "test:unit": "tap test/*.js",
+    "test:typescript": "tsd"
   },
   "repository": {
     "type": "git",
