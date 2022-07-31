@@ -3,7 +3,7 @@
   "version": "5.1.1",
   "description": "Create a secure stateless cookie session for Fastify",
   "main": "index.js",
-  "types": "index.d.ts",
+  "types": "types/index.d.ts",
   "bin": {
     "@fastify/secure-session": "genkey.js"
   },

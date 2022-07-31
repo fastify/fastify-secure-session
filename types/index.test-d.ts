@@ -2,7 +2,6 @@ import SecureSessionPlugin, { Session, SessionData } from "..";
 import fastify, {
   FastifyRequest,
   FastifyInstance,
-  RequestGenericInterface,
   FastifyReply,
 } from "fastify";
 import { expectType } from "tsd";
@@ -14,7 +13,7 @@ app.register(SecureSessionPlugin, { key: Buffer.from("foo") });
 app.register(SecureSessionPlugin, { key: ["foo", "bar"] });
 app.register(SecureSessionPlugin, { secret: "foo", salt: "bar" });
 
-declare module "../index" {
+declare module ".." {
   interface SessionData {
     foo: string;
   }
