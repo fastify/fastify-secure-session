@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { CookieSerializeOptions } from "@fastify/cookie";
-import { FastifyPlugin, FastifyLoggerInstance } from "fastify";
+import { FastifyPluginCallback, FastifyLoggerInstance } from "fastify";
 
 export type Session = Partial<SessionData> & {
   changed: boolean;
@@ -24,7 +24,7 @@ export type SecureSessionPluginOptions = {
   salt: string | Buffer
 })
 
-declare const SecureSessionPlugin: FastifyPlugin<SecureSessionPluginOptions>;
+declare const SecureSessionPlugin: FastifyPluginCallback<SecureSessionPluginOptions>;
 
 export default SecureSessionPlugin;
 
