@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "bin": {
-    "generate-secure-session-key": "./bin/generate-key.js"
+    "secure-session-gen-key": "./bin/generate-key.js"
   },
   "scripts": {
     "test": "standard && tap test/*.js && tsd"
