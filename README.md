@@ -14,13 +14,13 @@ After you installed `@fastify/secure-session` in your project, you can run `secu
 project-folder.
 
 ```sh
-./node_modules/.bin/secure-session-gen-key > secret-key
+npx fastify-secure-session-generate-key > secret-key
 ```
 
 If running in Windows Powershell, you should use this command instead:
 
 ```sh
-./node_modules/.bin/secure-session-gen-key | Out-File -Encoding default -NoNewline -FilePath secret-key
+npx fastify-secure-session-generate-key | Out-File -Encoding default -NoNewline -FilePath secret-key
 ```
 
 Then, register the plugin as follows:
@@ -185,8 +185,8 @@ with the original `mySecureKey` to still be decoded. The first time a session si
 To see a full working example, make sure you generate `secret-key1` and `secret-key2` alongside the js file below by running:
 
 ```
-./node_modules/.bin/secure-session-gen-key > secret-key1
-./node_modules/.bin/secure-session-gen-key > secret-key2
+npx fastify-secure-session-generate-key > secret-key1
+npx fastify-secure-session-generate-key > secret-key2
 ```
 
 ```js

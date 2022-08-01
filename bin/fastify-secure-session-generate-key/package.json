@@ -1,0 +1,32 @@
+{
+  "name": "fastify-secure-session-generate-key",
+  "version": "1.0.0",
+  "description": "Create a secure session key for the Fastify secure session plugin",
+  "main": "generate-key.js",
+  "bin": {
+    "fastify-secure-session-generate-key": "./generate-key.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fastify/fastify-secure-session.git"
+  },
+  "keywords": [
+    "fastify",
+    "secure",
+    "session",
+    "generate",
+    "key"
+  ],
+  "author": "Matteo Collina <hello@matteocollina.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fastify/fastify-secure-session/issues"
+  },
+  "homepage": "https://github.com/fastify/fastify-secure-session#readme",
+  "dependencies": {
+    "minimist": "^1.2.6"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
