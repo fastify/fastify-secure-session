@@ -71,19 +71,19 @@ module.exports = fp(function (fastify, options, next) {
     key = options.key
     if (typeof key === 'string') {
       key = Buffer.from(key, 'base64')
-    } else if (key instanceof Array) {
+    } else if (Array.isArray(key)) {
       try {
         key = key.map(ensureBufferKey)
       } catch (error) {
         return next(error)
       }
-    } else if (!(key instanceof Buffer)) {
+    } else if (Buffer.isBuffer(key) === false) {
       return next(new Error('key must be a string or a Buffer'))
     }
 
-    if (!(key instanceof Array) && isBufferKeyLengthInvalid(key)) {
+    if (Array.isArray(key) === false && isBufferKeyLengthInvalid(key)) {
       return next(new Error(`key must be ${sodium.crypto_secretbox_KEYBYTES} bytes`))
-    } else if (key instanceof Array && key.every(isBufferKeyLengthInvalid)) {
+    } else if (Array.isArray(key) && key.every(isBufferKeyLengthInvalid)) {
       return next(new Error(`key lengths must be ${sodium.crypto_secretbox_KEYBYTES} bytes`))
     }
   }
@@ -92,7 +92,7 @@ module.exports = fp(function (fastify, options, next) {
     return next(new Error('key or secret must specified'))
   }
 
-  if (!(key instanceof Array)) {
+  if (Array.isArray(key) === false) {
     key = [key]
   }
 
@@ -269,15 +269,15 @@ function genNonce () {
 }
 
 function ensureBufferKey (k) {
-  if (k instanceof Buffer) {
+  if (Buffer.isBuffer(k)) {
     return k
   }
 
-  if (typeof k !== 'string') {
-    throw new Error('Key must be string or buffer')
+  if (typeof k === 'string') {
+    return Buffer.from(k, 'base64')
   }
-
-  return Buffer.from(k, 'base64')
+  
+  throw new Error('Key must be string or buffer')
 }
 
 function isBufferKeyLengthInvalid (k) {
