@@ -5,7 +5,7 @@ const fs = require('fs')
 const path = require('path')
 const assert = require('assert')
 
-fastify.register(require('./'), {
+fastify.register(require('../..'), {
   key: fs.readFileSync(path.join(__dirname, 'example-key'))
 })
 
