@@ -50,7 +50,7 @@ tap.test('creates an empty session when the cipher is not long enough', async t 
 
   fastify.decodeSecureSession(`${buf.toString('base64')};`, {
     debug: (msg) => {
-      t.equal(msg, 'fastify-secure-session: the cipher is not long enough, creating an empty session')
+      t.equal(msg, '@fastify/secure-session: the cipher is not long enough, creating an empty session')
     }
   })
 })
@@ -75,7 +75,7 @@ tap.test('creates an empty session when decryption fails', async t => {
 
   fastify.decodeSecureSession(`${buf.toString('base64')};${buf2.toString('base64')}`, {
     debug: (msg) => {
-      t.equal(msg, 'fastify-secure-session: unable to decrypt, creating an empty session')
+      t.equal(msg, '@fastify/secure-session: unable to decrypt, creating an empty session')
     }
   })
 })
