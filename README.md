@@ -10,7 +10,7 @@ and [@fastify/cookie](https://github.com/fastify/fastify-cookie).
 
 ## Using a pregenerated key
 
-After you installed `@fastify/secure-session` in your project, you can run `secure-session-gen-key` from your 
+After you installed `@fastify/secure-session` in your project, you can run `npx fastify-secure-session-generate-key` from your 
 project-folder.
 
 ```sh
