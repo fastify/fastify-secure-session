@@ -276,7 +276,7 @@ function ensureBufferKey (k) {
   if (typeof k === 'string') {
     return Buffer.from(k, 'base64')
   }
-  
+
   throw new Error('Key must be string or buffer')
 }
 
