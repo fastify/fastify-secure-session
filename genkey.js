@@ -19,7 +19,7 @@ if (argv.h) {
   if (length < 32) {
     process.stderr.write('secret must be at least 32 bytes\n')
     process.exit(1)
-  } else {
-    process.stdout.write(require('crypto').randomBytes(length).toString(encoding))
   }
+
+  process.stdout.write(require('crypto').randomBytes(length).toString(encoding))
 }
