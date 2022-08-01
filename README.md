@@ -184,8 +184,8 @@ with the original `mySecureKey` to still be decoded. The first time a session si
 To see a full working example, make sure you generate `secret-key1` and `secret-key2` alongside the js file below by running:
 
 ```
-./node_modules/.bin/secure-session-gen-key > secret-key1
-./node_modules/.bin/secure-session-gen-key > secret-key2
+npx @fastify/secure-session > secret-key1
+npx @fastify/secure-session > secret-key2
 ```
 
 ```js
