@@ -106,7 +106,7 @@ module.exports = fp(function (fastify, options, next) {
   fastify.decorate('decodeSecureSession', (cookie, log = fastify.log) => {
     if (cookie === undefined) {
       // there is no cookie
-      log.trace('fastify-secure-session: there is no cookie, creating an empty session')
+      log.trace('@fastify/secure-session: there is no cookie, creating an empty session')
       return null
     }
 
@@ -117,7 +117,7 @@ module.exports = fp(function (fastify, options, next) {
 
     if (split.length <= 1) {
       // the cookie is malformed
-      log.debug('fastify-secure-session: the cookie is malformed, creating an empty session')
+      log.debug('@fastify/secure-session: the cookie is malformed, creating an empty session')
       return null
     }
 
@@ -126,13 +126,13 @@ module.exports = fp(function (fastify, options, next) {
 
     if (cipher.length < sodium.crypto_secretbox_MACBYTES) {
       // not long enough
-      log.debug('fastify-secure-session: the cipher is not long enough, creating an empty session')
+      log.debug('@fastify/secure-session: the cipher is not long enough, creating an empty session')
       return null
     }
 
     if (nonce.length !== sodium.crypto_secretbox_NONCEBYTES) {
       // the length is not correct
-      log.debug('fastify-secure-session: the nonce does not have the required length, creating an empty session')
+      log.debug('@fastify/secure-session: the nonce does not have the required length, creating an empty session')
       return null
     }
 
@@ -149,7 +149,7 @@ module.exports = fp(function (fastify, options, next) {
 
     if (!decodeSuccess) {
       // unable to decrypt
-      log.debug('fastify-secure-session: unable to decrypt, creating an empty session')
+      log.debug('@fastify/secure-session: unable to decrypt, creating an empty session')
       return null
     }
 
@@ -198,11 +198,11 @@ module.exports = fp(function (fastify, options, next) {
 
       if (!session || !session.changed) {
         // nothing to do
-        request.log.trace('fastify-secure-session: there is no session or the session didn\'t change, leaving it as is')
+        request.log.trace('@fastify/secure-session: there is no session or the session didn\'t change, leaving it as is')
         next()
         return
       } else if (session.deleted) {
-        request.log.debug('fastify-secure-session: deleting session')
+        request.log.debug('@fastify/secure-session: deleting session')
         const tmpCookieOptions = Object.assign(
           {},
           cookieOptions,
@@ -214,7 +214,7 @@ module.exports = fp(function (fastify, options, next) {
         return
       }
 
-      request.log.trace('fastify-secure-session: setting session')
+      request.log.trace('@fastify/secure-session: setting session')
       reply.setCookie(
         cookieName,
         fastify.encodeSecureSession(session),
