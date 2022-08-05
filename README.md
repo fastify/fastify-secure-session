@@ -139,7 +139,7 @@ fastify.get('/all', (request, reply) => {
   reply.send(data)
 })
 
-fastify.listen(3000)
+fastify.listen({ port: 3000 })
 ```
 
 ## Using Keys with key rotation
@@ -222,7 +222,7 @@ fastify.get('/', (request, reply) => {
   reply.send(data)
 })
 
-fastify.listen(3000)
+fastify.listen({ port: 3000 })
 ```
 
 WARNING: The more keys you have in the key array can make the decode operation get expensive if too many keys are used.
