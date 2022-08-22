@@ -19,6 +19,7 @@ export interface SessionData {
 export type SecureSessionPluginOptions = {
   cookie?: CookieSerializeOptions
   cookieName?: string
+  fieldName?: string
 } & ({key: string | Buffer | (string | Buffer)[]} | {
   secret: string | Buffer,
   salt: string | Buffer

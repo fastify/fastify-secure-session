@@ -36,9 +36,12 @@
     "fastify": "^4.0.0-rc.2",
     "standard": "^17.0.0",
     "tap": "^16.1.0",
-    "tsd": "^0.22.0",
-    "typescript": "^4.0.2"
+    "tsd": "^0.22.0"
   },
+  "pre-commit": [
+    "lint",
+    "test"
+  ],
   "dependencies": {
     "@fastify/cookie": "^7.0.0",
     "fastify-plugin": "^4.0.0",
