@@ -22,6 +22,15 @@ If running in Windows Powershell, you should use this command instead:
 npx @fastify/secure-session | Out-File -Encoding default -NoNewline -FilePath secret-key
 ```
 
+If you have not previously used this module with npx, you will be prompted to install it,
+which with the output redirect will cause the command to wait forever for input.
+
+To avoid this use the `--yes` flag with npx:
+
+```sh
+npx --yes @fastify/secure-session > secret-key
+```
+
 Then, register the plugin as follows:
 
 ```js
