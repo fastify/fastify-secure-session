@@ -38,7 +38,7 @@ const sessionProxyHandler = {
   }
 }
 
-module.exports = fp(function (fastify, options, next) {
+function fastifySecureSession (fastify, options, next) {
   let key
   if (options.secret) {
     if (Buffer.byteLength(options.secret) < 32) {
@@ -226,10 +226,7 @@ module.exports = fp(function (fastify, options, next) {
 
     next()
   }
-}, {
-  fastify: '4.x',
-  name: '@fastify/secure-session'
-})
+}
 
 class Session {
   constructor (obj) {
@@ -285,3 +282,10 @@ function isBufferKeyLengthInvalid (k) {
   // or this will result in a runtime error when encoding the session
   return k.length !== sodium.crypto_secretbox_KEYBYTES
 }
+
+module.exports = fp(fastifySecureSession, {
+  fastify: '4.x',
+  name: '@fastify/secure-session'
+})
+module.exports.default = fastifySecureSession
+module.exports.fastifySecureSession = fastifySecureSession
