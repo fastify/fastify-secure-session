@@ -31,6 +31,12 @@ To avoid this use the `--yes` flag with npx:
 npx --yes @fastify/secure-session > secret-key
 ```
 
+If you don't want to use `npx`, you can still generate the `secret-key` installing the `@fastify/secure-session` library with your choice package manager, and then:
+
+```sh
+./node_modules/@fastify/secure-session/genkey.js > secret_key
+```
+
 Then, register the plugin as follows:
 
 ```js
