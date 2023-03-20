@@ -257,7 +257,7 @@ You can configure the options for `setCookie` inside a route by using the `sessi
 fastify.post('/', (request, reply) => {
   request.session.set('data', request.body)
   // .options takes any parameter that you can pass to setCookie
-  request.session.options({ maxAge: 60 * 60 }); // 3600 seconds => maxAge is always passed is in seconds
+  request.session.options({ maxAge: 60 * 60 }); // 3600 seconds => maxAge is always passed in seconds
   reply.send('hello world')
 })
 ```
