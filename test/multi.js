@@ -14,7 +14,7 @@ fastify.register(SecureSession, {
     path: '/',
     maxAge: 3600
   },
-  fieldName: 'longTermSession'
+  sessionKey: 'longTermSession'
 })
 
 fastify.register(SecureSession, {
@@ -24,7 +24,7 @@ fastify.register(SecureSession, {
     path: '/',
     maxAge: 60
   },
-  fieldName: 'shortTermSession'
+  sessionKey: 'shortTermSession'
 })
 
 fastify.post('/', (request, reply) => {

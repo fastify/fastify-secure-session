@@ -8,7 +8,7 @@ const kCookieOptions = Symbol('cookie options')
 // allows us to use property getters and setters as well as get and set methods on session object
 const sessionProxyHandler = {
   get (target, prop) {
-    // Calling functions eg request[fieldName].get('key') or request[fieldName].set('key', 'value')
+    // Calling functions eg request[sessionKey].get('key') or request[sessionKey].set('key', 'value')
     if (typeof target[prop] === 'function') {
       return new Proxy(target[prop], {
         apply (applyTarget, thisArg, args) {
@@ -17,7 +17,7 @@ const sessionProxyHandler = {
       })
     }
 
-    // accessing own properties, eg request[fieldName].changed
+    // accessing own properties, eg request[sessionKey].changed
     if (Object.prototype.hasOwnProperty.call(target, prop)) {
       return target[prop]
     }
@@ -26,7 +26,7 @@ const sessionProxyHandler = {
     return target.get(prop)
   },
   set (target, prop, value) {
-    // modifying own properties, eg request[fieldName].changed
+    // modifying own properties, eg request[sessionKey].changed
     if (Object.prototype.hasOwnProperty.call(target, prop)) {
       target[prop] = value
       return true
@@ -96,13 +96,13 @@ function fastifySecureSession (fastify, options, next) {
     key = [key]
   }
 
-  const fieldName = options.fieldName || 'session'
-  const cookieName = options.cookieName || fieldName
+  const sessionKey = options.sessionKey || 'session'
+  const cookieName = options.cookieName || sessionKey
   const cookieOptions = options.cookieOptions || options.cookie || {}
 
   // just to add something to the shape
   // TODO verify if it helps the perf
-  fastify.decorateRequest(fieldName, null)
+  fastify.decorateRequest(sessionKey, null)
 
   if (!fastify.hasDecorator('decodeSecureSession')) {
     fastify.decorate('decodeSecureSession', (cookie, log = fastify.log) => {
@@ -195,13 +195,13 @@ function fastifySecureSession (fastify, options, next) {
       const cookie = request.cookies[cookieName]
       const result = fastify.decodeSecureSession(cookie, request.log)
 
-      request[fieldName] = new Proxy((result || new Session({})), sessionProxyHandler)
+      request[sessionKey] = new Proxy((result || new Session({})), sessionProxyHandler)
 
       next()
     })
 
     fastify.addHook('onSend', (request, reply, payload, next) => {
-      const session = request[fieldName]
+      const session = request[sessionKey]
 
       if (!session || !session.changed) {
         // nothing to do

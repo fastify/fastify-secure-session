@@ -34,7 +34,7 @@ declare namespace fastifySecureSession {
   export type SecureSessionPluginOptions = {
     cookie?: CookieSerializeOptions
     cookieName?: string
-    fieldName?: string
+    sessionKey?: string
   } & ({ key: string | Buffer | (string | Buffer)[] } | {
     secret: string | Buffer,
     salt: string | Buffer
