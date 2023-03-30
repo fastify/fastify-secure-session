@@ -17,7 +17,7 @@ declare module "fastify" {
 type FastifySecureSession = FastifyPluginCallback<fastifySecureSession.SecureSessionPluginOptions>;
 
 declare namespace fastifySecureSession {
-  export type Session = Partial<SessionData> & {
+  export type Session<T = SessionData> = Partial<T> & {
     changed: boolean;
     deleted: boolean;
     get<Key extends keyof SessionData>(key: Key): SessionData[Key] | undefined;
@@ -34,6 +34,7 @@ declare namespace fastifySecureSession {
   export type SecureSessionPluginOptions = {
     cookie?: CookieSerializeOptions
     cookieName?: string
+    fieldName?: string
   } & ({ key: string | Buffer | (string | Buffer)[] } | {
     secret: string | Buffer,
     salt: string | Buffer

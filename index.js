@@ -8,7 +8,7 @@ const kCookieOptions = Symbol('cookie options')
 // allows us to use property getters and setters as well as get and set methods on session object
 const sessionProxyHandler = {
   get (target, prop) {
-    // Calling functions eg request.session.get('key') or request.session.set('key', 'value')
+    // Calling functions eg request[fieldName].get('key') or request[fieldName].set('key', 'value')
     if (typeof target[prop] === 'function') {
       return new Proxy(target[prop], {
         apply (applyTarget, thisArg, args) {
@@ -17,7 +17,7 @@ const sessionProxyHandler = {
       })
     }
 
-    // accessing own properties, eg request.session.changed
+    // accessing own properties, eg request[fieldName].changed
     if (Object.prototype.hasOwnProperty.call(target, prop)) {
       return target[prop]
     }
@@ -26,7 +26,7 @@ const sessionProxyHandler = {
     return target.get(prop)
   },
   set (target, prop, value) {
-    // modifying own properties, eg request.session.changed
+    // modifying own properties, eg request[fieldName].changed
     if (Object.prototype.hasOwnProperty.call(target, prop)) {
       target[prop] = value
       return true
@@ -96,79 +96,86 @@ function fastifySecureSession (fastify, options, next) {
     key = [key]
   }
 
-  const cookieName = options.cookieName || 'session'
+  const fieldName = options.fieldName || 'session'
+  const cookieName = options.cookieName || fieldName
   const cookieOptions = options.cookieOptions || options.cookie || {}
 
   // just to add something to the shape
   // TODO verify if it helps the perf
-  fastify.decorateRequest('session', null)
+  fastify.decorateRequest(fieldName, null)
 
-  fastify.decorate('decodeSecureSession', (cookie, log = fastify.log) => {
-    if (cookie === undefined) {
+  if (!fastify.hasDecorator('decodeSecureSession')) {
+    fastify.decorate('decodeSecureSession', (cookie, log = fastify.log) => {
+      if (cookie === undefined) {
       // there is no cookie
-      log.trace('@fastify/secure-session: there is no cookie, creating an empty session')
-      return null
-    }
+        log.trace('@fastify/secure-session: there is no cookie, creating an empty session')
+        return null
+      }
 
-    // do not use destructuring or it will deopt
-    const split = cookie.split(';')
-    const cyphertextB64 = split[0]
-    const nonceB64 = split[1]
+      // do not use destructuring or it will deopt
+      const split = cookie.split(';')
+      const cyphertextB64 = split[0]
+      const nonceB64 = split[1]
 
-    if (split.length <= 1) {
+      if (split.length <= 1) {
       // the cookie is malformed
-      log.debug('@fastify/secure-session: the cookie is malformed, creating an empty session')
-      return null
-    }
+        log.debug('@fastify/secure-session: the cookie is malformed, creating an empty session')
+        return null
+      }
 
-    const cipher = Buffer.from(cyphertextB64, 'base64')
-    const nonce = Buffer.from(nonceB64, 'base64')
+      const cipher = Buffer.from(cyphertextB64, 'base64')
+      const nonce = Buffer.from(nonceB64, 'base64')
 
-    if (cipher.length < sodium.crypto_secretbox_MACBYTES) {
+      if (cipher.length < sodium.crypto_secretbox_MACBYTES) {
       // not long enough
-      log.debug('@fastify/secure-session: the cipher is not long enough, creating an empty session')
-      return null
-    }
+        log.debug('@fastify/secure-session: the cipher is not long enough, creating an empty session')
+        return null
+      }
 
-    if (nonce.length !== sodium.crypto_secretbox_NONCEBYTES) {
+      if (nonce.length !== sodium.crypto_secretbox_NONCEBYTES) {
       // the length is not correct
-      log.debug('@fastify/secure-session: the nonce does not have the required length, creating an empty session')
-      return null
-    }
+        log.debug('@fastify/secure-session: the nonce does not have the required length, creating an empty session')
+        return null
+      }
 
-    const msg = Buffer.allocUnsafe(cipher.length - sodium.crypto_secretbox_MACBYTES)
+      const msg = Buffer.allocUnsafe(cipher.length - sodium.crypto_secretbox_MACBYTES)
 
-    let signingKeyRotated = false
-    const decodeSuccess = key.some((k, i) => {
-      const decoded = sodium.crypto_secretbox_open_easy(msg, cipher, nonce, k)
+      let signingKeyRotated = false
+      const decodeSuccess = key.some((k, i) => {
+        const decoded = sodium.crypto_secretbox_open_easy(msg, cipher, nonce, k)
 
-      signingKeyRotated = decoded && i > 0
+        signingKeyRotated = decoded && i > 0
 
-      return decoded
-    })
+        return decoded
+      })
 
-    if (!decodeSuccess) {
+      if (!decodeSuccess) {
       // unable to decrypt
-      log.debug('@fastify/secure-session: unable to decrypt, creating an empty session')
-      return null
-    }
+        log.debug('@fastify/secure-session: unable to decrypt, creating an empty session')
+        return null
+      }
 
-    const session = new Proxy(new Session(JSON.parse(msg)), sessionProxyHandler)
-    session.changed = signingKeyRotated
-    return session
-  })
+      const session = new Proxy(new Session(JSON.parse(msg)), sessionProxyHandler)
+      session.changed = signingKeyRotated
+      return session
+    })
+  }
 
-  fastify.decorate('createSecureSession', (data) => new Proxy(new Session(data), sessionProxyHandler))
+  if (!fastify.hasDecorator('createSecureSession')) {
+    fastify.decorate('createSecureSession', (data) => new Proxy(new Session(data), sessionProxyHandler))
+  }
 
-  fastify.decorate('encodeSecureSession', (session) => {
-    const nonce = genNonce()
-    const msg = Buffer.from(JSON.stringify(session[kObj]))
+  if (!fastify.hasDecorator('encodeSecureSession')) {
+    fastify.decorate('encodeSecureSession', (session) => {
+      const nonce = genNonce()
+      const msg = Buffer.from(JSON.stringify(session[kObj]))
 
-    const cipher = Buffer.allocUnsafe(msg.length + sodium.crypto_secretbox_MACBYTES)
-    sodium.crypto_secretbox_easy(cipher, msg, nonce, key[0])
+      const cipher = Buffer.allocUnsafe(msg.length + sodium.crypto_secretbox_MACBYTES)
+      sodium.crypto_secretbox_easy(cipher, msg, nonce, key[0])
 
-    return cipher.toString('base64') + ';' + nonce.toString('base64')
-  })
+      return cipher.toString('base64') + ';' + nonce.toString('base64')
+    })
+  }
 
   if (fastify.hasPlugin('@fastify/cookie')) {
     fastify
@@ -188,13 +195,13 @@ function fastifySecureSession (fastify, options, next) {
       const cookie = request.cookies[cookieName]
       const result = fastify.decodeSecureSession(cookie, request.log)
 
-      request.session = new Proxy((result || new Session({})), sessionProxyHandler)
+      request[fieldName] = new Proxy((result || new Session({})), sessionProxyHandler)
 
       next()
     })
 
     fastify.addHook('onSend', (request, reply, payload, next) => {
-      const session = request.session
+      const session = request[fieldName]
 
       if (!session || !session.changed) {
         // nothing to do

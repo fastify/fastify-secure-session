@@ -47,7 +47,9 @@ const fs = require('fs')
 const path = require('path')
 
 fastify.register(require('@fastify/secure-session'), {
-  // the name of the session cookie, defaults to 'session'
+  // the name of the attribute decorated on the request-object, defaults to 'session'
+  fieldName: 'my-session',
+  // the name of the session cookie, defaults to value of fieldName
   cookieName: 'my-session-cookie',
   // adapt this to point to the directory where secret-key is located
   key: fs.readFileSync(path.join(__dirname, 'secret-key')),
@@ -290,6 +292,25 @@ declare module '@fastify/secure-session' {
 
 fastify.get('/', (request, reply) => {
   request.session.get('foo'); // typed `string | undefined`
+  reply.send('hello world')
+})
+```
+
+When using a custom fieldName the types should be configured as follows:
+
+```ts
+interface FooSessionData {
+  foo: string;
+}
+
+declare module "fastify" {
+  interface FastifyRequest {
+    foo: Session<FooSessionData>;
+  }
+}
+
+fastify.get('/', (request, reply) => {
+  request.foo.get('foo'); // typed `string | undefined`
   reply.send('hello world')
 })
 ```
