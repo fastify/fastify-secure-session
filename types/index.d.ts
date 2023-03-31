@@ -20,9 +20,10 @@ declare namespace fastifySecureSession {
   export type Session<T = SessionData> = Partial<T> & {
     changed: boolean;
     deleted: boolean;
-    get<Key extends keyof SessionData>(key: Key): SessionData[Key] | undefined;
-    set<Key extends keyof SessionData>(key: Key, value: SessionData[Key] | undefined): void;
-    data(): SessionData | undefined;
+    get<Key extends keyof T>(key: Key): T[Key] | undefined;
+    get(key: string): any | undefined;
+    set<Key extends keyof T>(key: Key, value: T[Key] | undefined): void;
+    data(): T | undefined;
     delete(): void;
     options(opts: CookieSerializeOptions): void;
   }
