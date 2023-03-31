@@ -13,6 +13,7 @@ app.register(SecureSessionPlugin, { key: Buffer.from("foo") });
 app.register(SecureSessionPlugin, { key: ["foo", "bar"] });
 app.register(SecureSessionPlugin, { secret: "foo", salt: "bar" });
 app.register(SecureSessionPlugin, { sessionKey: "foo", key: "bar" });
+app.register(SecureSessionPlugin, [{ sessionKey: "foo", key: "bar" }, { sessionKey: "bar", key: "bar" }]);
 
 declare module ".." {
   interface SessionData {

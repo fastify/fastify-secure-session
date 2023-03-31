@@ -5,8 +5,8 @@ import { FastifyPluginCallback, FastifyBaseLogger } from "fastify";
 declare module "fastify" {
   interface FastifyInstance {
     createSecureSession(data?: Record<string, any>): fastifySecureSession.Session
-    decodeSecureSession(cookie: string, log?: FastifyBaseLogger): fastifySecureSession.Session | null
-    encodeSecureSession(session: fastifySecureSession.Session): string
+    decodeSecureSession(cookie: string, log?: FastifyBaseLogger, sessionKey?: string): fastifySecureSession.Session | null
+    encodeSecureSession(session: fastifySecureSession.Session, sessionKey?: string): string
   }
 
   interface FastifyRequest {
@@ -14,7 +14,7 @@ declare module "fastify" {
   }
 }
 
-type FastifySecureSession = FastifyPluginCallback<fastifySecureSession.SecureSessionPluginOptions>;
+type FastifySecureSession = FastifyPluginCallback<fastifySecureSession.SecureSessionPluginOptions | (fastifySecureSession.SecureSessionPluginOptions & Required<Pick<fastifySecureSession.SecureSessionPluginOptions, 'sessionKey'>>)[]>;
 
 declare namespace fastifySecureSession {
   export type Session<T = SessionData> = Partial<T> & {
