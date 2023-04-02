@@ -8,7 +8,7 @@ const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 sodium.randombytes_buf(key)
 
 fastify.register(require('../'), {
-  sessionKey: 'barfoo',
+  sessionName: 'barfoo',
   cookieName: 'foobar',
   key
 })

@@ -48,8 +48,8 @@ const path = require('path')
 
 fastify.register(require('@fastify/secure-session'), {
   // the name of the attribute decorated on the request-object, defaults to 'session'
-  sessionKey: 'session',
-  // the name of the session cookie, defaults to value of sessionKey
+  sessionName: 'session',
+  // the name of the session cookie, defaults to value of sessionName
   cookieName: 'my-session-cookie',
   // adapt this to point to the directory where secret-key is located
   key: fs.readFileSync(path.join(__dirname, 'secret-key')),
@@ -62,8 +62,8 @@ fastify.register(require('@fastify/secure-session'), {
 fastify.post('/', (request, reply) => {
   request.session.set('data', request.body)
 
-  // or when using a custom sessionKey: 
-  request.customSessionKey.set('data', request.body)
+  // or when using a custom sessionName: 
+  request.customsessionName.set('data', request.body)
 
   reply.send('hello world')
 })
@@ -93,18 +93,18 @@ Note: Instead of using the `get` and `set` methods as seen above, you may also w
 
 ### Multiple sessions
 
-If you want to use multiple sessions, you have to supply an array of options when registering the plugin. It supports the same options as a single session but in this case, the `sessionKey` name is mandatory.
+If you want to use multiple sessions, you have to supply an array of options when registering the plugin. It supports the same options as a single session but in this case, the `sessionName` name is mandatory.
 
 ```js
 fastify.register(require('@fastify/secure-session'), [{
-  sessionKey: 'mySession',
+  sessionName: 'mySession',
   cookieName: 'my-session-cookie',
   key: fs.readFileSync(path.join(__dirname, 'secret-key')),
   cookie: {
     path: '/'
   }
 }, {
-  sessionKey: 'myOtherSession',
+  sessionName: 'myOtherSession',
   key: fs.readFileSync(path.join(__dirname, 'another-secret-key')),
   cookie: {
     path: '/path',
@@ -312,7 +312,7 @@ fastify.decodeSecureSession(request.cookies['session'])
 // => Session | null  returns a session object which you can use to .get values from if decoding is successful, and null otherwise
 ```
 
-When using multiple sessions, you will have to provide the sessionKey when encoding and decoding the session.
+When using multiple sessions, you will have to provide the sessionName when encoding and decoding the session.
 
 ```js
 fastify.encodeSecureSession(request.session, 'mySecondSession')
@@ -337,7 +337,7 @@ fastify.get('/', (request, reply) => {
 })
 ```
 
-When using a custom sessionKey or using multiple sessions the types should be configured as follows:
+When using a custom sessionName or using multiple sessions the types should be configured as follows:
 
 ```ts
 interface FooSessionData {

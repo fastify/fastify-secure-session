@@ -13,7 +13,7 @@ tap.test('it should handle multiple sessions properly', t => {
       path: '/',
       maxAge: 3600
     },
-    sessionKey: 'longTermSession'
+    sessionName: 'longTermSession'
   }, {
     secret: 'VS-nfD aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     cookieName: 'short-term-cookie',
@@ -22,7 +22,7 @@ tap.test('it should handle multiple sessions properly', t => {
       maxAge: 60,
       domain: 'fastify.io'
     },
-    sessionKey: 'shortTermSession'
+    sessionName: 'shortTermSession'
   }])
 
   fastify.post('/', (request, reply) => {
@@ -106,11 +106,11 @@ tap.test('decorators should handle multiple sessions properly', async t => {
 
   await fastify.register(require('../'), [{
     secret: 'top_secret aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    sessionKey: 'longTermSession'
+    sessionName: 'longTermSession'
   }, {
     secret: 'VS-nfD aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     cookieName: 'short-term-cookie',
-    sessionKey: 'shortTermSession'
+    sessionName: 'shortTermSession'
   }])
 
   t.teardown(fastify.close.bind(fastify))

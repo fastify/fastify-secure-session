@@ -8,7 +8,7 @@ const kCookieOptions = Symbol('cookie options')
 // allows us to use property getters and setters as well as get and set methods on session object
 const sessionProxyHandler = {
   get (target, prop) {
-    // Calling functions eg request[sessionKey].get('key') or request[sessionKey].set('key', 'value')
+    // Calling functions eg request[sessionName].get('key') or request[sessionName].set('key', 'value')
     if (typeof target[prop] === 'function') {
       return new Proxy(target[prop], {
         apply (applyTarget, thisArg, args) {
@@ -17,7 +17,7 @@ const sessionProxyHandler = {
       })
     }
 
-    // accessing own properties, eg request[sessionKey].changed
+    // accessing own properties, eg request[sessionName].changed
     if (Object.prototype.hasOwnProperty.call(target, prop)) {
       return target[prop]
     }
@@ -26,7 +26,7 @@ const sessionProxyHandler = {
     return target.get(prop)
   },
   set (target, prop, value) {
-    // modifying own properties, eg request[sessionKey].changed
+    // modifying own properties, eg request[sessionName].changed
     if (Object.prototype.hasOwnProperty.call(target, prop)) {
       target[prop] = value
       return true
@@ -43,12 +43,12 @@ function fastifySecureSession (fastify, options, next) {
     options = [options]
   }
 
-  let defaultSessionKey
-  const sessionKeys = new Map()
+  let defaultsessionName
+  const sessionNames = new Map()
 
   for (const sessionOptions of options) {
-    const sessionKey = sessionOptions.sessionKey || 'session'
-    const cookieName = sessionOptions.cookieName || sessionKey
+    const sessionName = sessionOptions.sessionName || 'session'
+    const cookieName = sessionOptions.cookieName || sessionName
     const cookieOptions = sessionOptions.cookieOptions || sessionOptions.cookie || {}
 
     let key
@@ -110,31 +110,31 @@ function fastifySecureSession (fastify, options, next) {
 
     // just to add something to the shape
     // TODO verify if it helps the perf
-    fastify.decorateRequest(sessionKey, null)
+    fastify.decorateRequest(sessionName, null)
 
-    sessionKeys.set(sessionKey, {
+    sessionNames.set(sessionName, {
       cookieName,
       cookieOptions,
       key
     })
 
-    if (!defaultSessionKey) {
-      defaultSessionKey = sessionKey
+    if (!defaultsessionName) {
+      defaultsessionName = sessionName
     }
   }
 
-  fastify.decorate('decodeSecureSession', (cookie, log = fastify.log, sessionKey = defaultSessionKey) => {
+  fastify.decorate('decodeSecureSession', (cookie, log = fastify.log, sessionName = defaultsessionName) => {
     if (cookie === undefined) {
       // there is no cookie
       log.trace('@fastify/secure-session: there is no cookie, creating an empty session')
       return null
     }
 
-    if (!sessionKeys.has(sessionKey)) {
+    if (!sessionNames.has(sessionName)) {
       throw new Error('Unknown session key.')
     }
 
-    const { key } = sessionKeys.get(sessionKey)
+    const { key } = sessionNames.get(sessionName)
 
     // do not use destructuring or it will deopt
     const split = cookie.split(';')
@@ -186,12 +186,12 @@ function fastifySecureSession (fastify, options, next) {
 
   fastify.decorate('createSecureSession', (data) => new Proxy(new Session(data), sessionProxyHandler))
 
-  fastify.decorate('encodeSecureSession', (session, sessionKey = defaultSessionKey) => {
-    if (!sessionKeys.has(sessionKey)) {
+  fastify.decorate('encodeSecureSession', (session, sessionName = defaultsessionName) => {
+    if (!sessionNames.has(sessionName)) {
       throw new Error('Unknown session key.')
     }
 
-    const { key } = sessionKeys.get(sessionKey)
+    const { key } = sessionNames.get(sessionName)
 
     const nonce = genNonce()
     const msg = Buffer.from(JSON.stringify(session[kObj]))
@@ -217,19 +217,19 @@ function fastifySecureSession (fastify, options, next) {
     // the hooks must be registered after @fastify/cookie hooks
 
     fastify.addHook('onRequest', (request, reply, next) => {
-      for (const [sessionKey, { cookieName }] of sessionKeys.entries()) {
+      for (const [sessionName, { cookieName }] of sessionNames.entries()) {
         const cookie = request.cookies[cookieName]
-        const result = fastify.decodeSecureSession(cookie, request.log, sessionKey)
+        const result = fastify.decodeSecureSession(cookie, request.log, sessionName)
 
-        request[sessionKey] = new Proxy((result || new Session({})), sessionProxyHandler)
+        request[sessionName] = new Proxy((result || new Session({})), sessionProxyHandler)
       }
 
       next()
     })
 
     fastify.addHook('onSend', (request, reply, payload, next) => {
-      for (const [sessionKey, { cookieName, cookieOptions }] of sessionKeys.entries()) {
-        const session = request[sessionKey]
+      for (const [sessionName, { cookieName, cookieOptions }] of sessionNames.entries()) {
+        const session = request[sessionName]
 
         if (!session || !session.changed) {
         // nothing to do
@@ -250,7 +250,7 @@ function fastifySecureSession (fastify, options, next) {
         request.log.trace('@fastify/secure-session: setting session')
         reply.setCookie(
           cookieName,
-          fastify.encodeSecureSession(session, sessionKey),
+          fastify.encodeSecureSession(session, sessionName),
           Object.assign({}, cookieOptions, session[kCookieOptions])
         )
       }
