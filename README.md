@@ -63,7 +63,7 @@ fastify.post('/', (request, reply) => {
   request.session.set('data', request.body)
 
   // or when using a custom sessionName: 
-  request.customsessionName.set('data', request.body)
+  request.customSessionName.set('data', request.body)
 
   reply.send('hello world')
 })

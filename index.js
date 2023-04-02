@@ -43,7 +43,7 @@ function fastifySecureSession (fastify, options, next) {
     options = [options]
   }
 
-  let defaultsessionName
+  let defaultSessionName
   const sessionNames = new Map()
 
   for (const sessionOptions of options) {
@@ -118,12 +118,12 @@ function fastifySecureSession (fastify, options, next) {
       key
     })
 
-    if (!defaultsessionName) {
-      defaultsessionName = sessionName
+    if (!defaultSessionName) {
+      defaultSessionName = sessionName
     }
   }
 
-  fastify.decorate('decodeSecureSession', (cookie, log = fastify.log, sessionName = defaultsessionName) => {
+  fastify.decorate('decodeSecureSession', (cookie, log = fastify.log, sessionName = defaultSessionName) => {
     if (cookie === undefined) {
       // there is no cookie
       log.trace('@fastify/secure-session: there is no cookie, creating an empty session')
@@ -186,7 +186,7 @@ function fastifySecureSession (fastify, options, next) {
 
   fastify.decorate('createSecureSession', (data) => new Proxy(new Session(data), sessionProxyHandler))
 
-  fastify.decorate('encodeSecureSession', (session, sessionName = defaultsessionName) => {
+  fastify.decorate('encodeSecureSession', (session, sessionName = defaultSessionName) => {
     if (!sessionNames.has(sessionName)) {
       throw new Error('Unknown session key.')
     }
