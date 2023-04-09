@@ -47,7 +47,9 @@ const fs = require('fs')
 const path = require('path')
 
 fastify.register(require('@fastify/secure-session'), {
-  // the name of the session cookie, defaults to 'session'
+  // the name of the attribute decorated on the request-object, defaults to 'session'
+  sessionName: 'session',
+  // the name of the session cookie, defaults to value of sessionName
   cookieName: 'my-session-cookie',
   // adapt this to point to the directory where secret-key is located
   key: fs.readFileSync(path.join(__dirname, 'secret-key')),
@@ -59,6 +61,10 @@ fastify.register(require('@fastify/secure-session'), {
 
 fastify.post('/', (request, reply) => {
   request.session.set('data', request.body)
+
+  // or when using a custom sessionName: 
+  request.customSessionName.set('data', request.body)
+
   reply.send('hello world')
 })
 
@@ -83,6 +89,35 @@ expect to be there is not present. For extra details, you can also enable `trace
 level logging.
 
 Note: Instead of using the `get` and `set` methods as seen above, you may also wish to use property getters and setters to make your code compatible with other libraries ie `request.session.data = request.body` and `const data = request.session.data` are also possible. However, if you want to have properties named `changed` or `deleted` in your session data, they can only be accessed via `session.get()` and `session.set()`. (Those are the names of internal properties used by the Session object)
+
+
+### Multiple sessions
+
+If you want to use multiple sessions, you have to supply an array of options when registering the plugin. It supports the same options as a single session but in this case, the `sessionName` name is mandatory.
+
+```js
+fastify.register(require('@fastify/secure-session'), [{
+  sessionName: 'mySession',
+  cookieName: 'my-session-cookie',
+  key: fs.readFileSync(path.join(__dirname, 'secret-key')),
+  cookie: {
+    path: '/'
+  }
+}, {
+  sessionName: 'myOtherSession',
+  key: fs.readFileSync(path.join(__dirname, 'another-secret-key')),
+  cookie: {
+    path: '/path',
+    maxAge: 100
+  }
+}])
+
+fastify.post('/', (request, reply) => {
+  request.mySession.set('data', request.body)
+  request.myOtherSession.set('data', request.body)
+  reply.send('hello world')
+})
+```
 
 ### Using keys as strings
 
@@ -277,6 +312,14 @@ fastify.decodeSecureSession(request.cookies['session'])
 // => Session | null  returns a session object which you can use to .get values from if decoding is successful, and null otherwise
 ```
 
+When using multiple sessions, you will have to provide the sessionName when encoding and decoding the session.
+
+```js
+fastify.encodeSecureSession(request.session, 'mySecondSession')
+
+fastify.decodeSecureSession(request.cookies['session'], undefined, 'mySecondSession')
+```
+
 ## Add TypeScript types
 
 The session data is typed as `{ [key: string]: any }`. This can be extended with [declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html) to get improved type support.
@@ -290,6 +333,25 @@ declare module '@fastify/secure-session' {
 
 fastify.get('/', (request, reply) => {
   request.session.get('foo'); // typed `string | undefined`
+  reply.send('hello world')
+})
+```
+
+When using a custom sessionName or using multiple sessions the types should be configured as follows:
+
+```ts
+interface FooSessionData {
+  foo: string;
+}
+
+declare module "fastify" {
+  interface FastifyRequest {
+    foo: Session<FooSessionData>;
+  }
+}
+
+fastify.get('/', (request, reply) => {
+  request.foo.get('foo'); // typed `string | undefined`
   reply.send('hello world')
 })
 ```

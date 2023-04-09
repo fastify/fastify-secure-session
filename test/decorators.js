@@ -6,7 +6,7 @@ const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 sodium.randombytes_buf(key)
 
 tap.test('it exposes encode and decode decorators for other libraries to use', async t => {
-  t.plan(8)
+  t.plan(10)
 
   const fastify = require('fastify')({
     logger: false
@@ -24,6 +24,9 @@ tap.test('it exposes encode and decode decorators for other libraries to use', a
   t.ok(fastify.encodeSecureSession(fastify.createSecureSession({ foo: 'bar' })))
   t.ok(fastify.encodeSecureSession(fastify.createSecureSession({})))
   t.not(fastify.encodeSecureSession(fastify.createSecureSession({ foo: 'bar' })), fastify.encodeSecureSession(fastify.createSecureSession({})))
+
+  t.throws(() => fastify.encodeSecureSession(fastify.createSecureSession({ foo: 'bar' }), 'key-does-not-exist'), {}, 'Unknown session key.')
+  t.throws(() => fastify.decodeSecureSession('bogus', undefined, 'key-does-not-exist'), {}, 'Unknown session key.')
 
   const cookie = fastify.encodeSecureSession(fastify.createSecureSession({ foo: 'bar' }))
   const decoded = fastify.decodeSecureSession(cookie)
