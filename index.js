@@ -39,7 +39,7 @@ const sessionProxyHandler = {
 }
 
 function fastifySecureSession (fastify, options, next) {
-  if (!(options instanceof Array)) {
+  if (!Array.isArray(options)) {
     options = [options]
   }
 
@@ -83,19 +83,19 @@ function fastifySecureSession (fastify, options, next) {
       key = sessionOptions.key
       if (typeof key === 'string') {
         key = Buffer.from(key, 'base64')
-      } else if (key instanceof Array) {
+      } else if (Array.isArray(key)) {
         try {
           key = key.map(ensureBufferKey)
         } catch (error) {
           return next(error)
         }
-      } else if (!(key instanceof Buffer)) {
+      } else if (!Buffer.isBuffer(key)) {
         return next(new Error('key must be a string or a Buffer'))
       }
 
-      if (!(key instanceof Array) && isBufferKeyLengthInvalid(key)) {
+      if (!Array.isArray(key) && isBufferKeyLengthInvalid(key)) {
         return next(new Error(`key must be ${sodium.crypto_secretbox_KEYBYTES} bytes`))
-      } else if (key instanceof Array && key.every(isBufferKeyLengthInvalid)) {
+      } else if (Array.isArray(key) && key.every(isBufferKeyLengthInvalid)) {
         return next(new Error(`key lengths must be ${sodium.crypto_secretbox_KEYBYTES} bytes`))
       }
     }
@@ -104,7 +104,7 @@ function fastifySecureSession (fastify, options, next) {
       return next(new Error('key or secret must specified'))
     }
 
-    if (!(key instanceof Array)) {
+    if (!Array.isArray(key)) {
       key = [key]
     }
 
@@ -300,7 +300,7 @@ function genNonce () {
 }
 
 function ensureBufferKey (k) {
-  if (k instanceof Buffer) {
+  if (Buffer.isBuffer(k)) {
     return k
   }
 
