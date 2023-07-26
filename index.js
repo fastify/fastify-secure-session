@@ -207,7 +207,9 @@ function fastifySecureSession (fastify, options, next) {
       .register(fp(addHooks))
   } else {
     fastify
-      .register(require('@fastify/cookie'))
+      .register(require('@fastify/cookie'), {
+        secret: options[0].secret
+      })
       .register(fp(addHooks))
   }
 
