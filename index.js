@@ -44,6 +44,7 @@ function fastifySecureSession (fastify, options, next) {
   }
 
   let defaultSessionName
+  let defaultSecret
   const sessionNames = new Map()
 
   for (const sessionOptions of options) {
@@ -55,6 +56,10 @@ function fastifySecureSession (fastify, options, next) {
     if (sessionOptions.secret) {
       if (Buffer.byteLength(sessionOptions.secret) < 32) {
         return next(new Error('secret must be at least 32 bytes'))
+      }
+
+      if (!defaultSecret) {
+        defaultSecret = sessionOptions.secret
       }
 
       key = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
@@ -208,7 +213,7 @@ function fastifySecureSession (fastify, options, next) {
   } else {
     fastify
       .register(require('@fastify/cookie'), {
-        secret: options[0].secret
+        secret: defaultSecret
       })
       .register(fp(addHooks))
   }
