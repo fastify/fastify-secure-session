@@ -224,3 +224,83 @@ tap.test('using secret with salt as buffer', function (t) {
     })
   })
 })
+
+tap.test('signing works with a secret', function (t) {
+  const fastify = require('fastify')({
+    logger: false
+  })
+
+  fastify.register(require('../'), {
+    secret: 'averylogphrasebiggerthanthirtytwochars',
+    salt: 'mq9hDxBVDbspDR6n'
+  })
+
+  fastify.post('/', (request, reply) => {
+    request.session.set('data', request.body)
+    reply.setCookie('my-session', JSON.stringify(request.body), {
+      httpOnly: true,
+      secure: true,
+      maxAge: 3600,
+      signed: true,
+      path: '/'
+    })
+    reply.send('session set')
+  })
+
+  fastify.get('/secure-session', (request, reply) => {
+    const data = request.session.get('data')
+    if (!data) {
+      reply.code(404).send()
+      return
+    }
+    reply.send(data)
+  })
+
+  fastify.get('/cookie-signed', (request, reply) => {
+    const data = request.unsignCookie(request.cookies['my-session'])
+    if (!data.valid) {
+      reply.code(404).send()
+      return
+    }
+    reply.send(data.value)
+  })
+
+  t.teardown(fastify.close.bind(fastify))
+  t.plan(7)
+
+  fastify.inject({
+    method: 'POST',
+    url: '/',
+    payload: {
+      some: 'data'
+    }
+  }, (error, response) => {
+    t.error(error)
+    t.equal(response.statusCode, 200)
+    t.ok(response.headers['set-cookie'])
+
+    const cookieHeader = response.headers['set-cookie'].join(';')
+
+    fastify.inject({
+      method: 'GET',
+      url: '/secure-session',
+      headers: {
+        cookie: cookieHeader
+      }
+    }, (error, response) => {
+      t.error(error)
+      t.same(JSON.parse(response.payload), { some: 'data' })
+
+      fastify.inject({
+        method: 'GET',
+        url: '/cookie-signed',
+        headers: {
+          cookie: cookieHeader
+        }
+      }, (error, response) => {
+        t.error(error)
+        t.same(JSON.parse(response.payload), { some: 'data' })
+      })
+    })
+  })
+})
