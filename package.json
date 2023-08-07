@@ -39,7 +39,7 @@
     "tsd": "^0.28.0"
   },
   "dependencies": {
-    "@fastify/cookie": "^8.0.0",
+    "@fastify/cookie": "^9.0.4",
     "fastify-plugin": "^4.0.0",
     "sodium-native": "^4.0.0"
   },
