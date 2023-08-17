@@ -5,7 +5,7 @@
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
 
 Create a secure stateless cookie session for Fastify, based on libsodium's
-[Secret Key Box Encryption](https://github.com/sodium-friends/sodium-native#secret-key-box-encryption)
+[Secret Key Box Encryption](https://sodium-friends.github.io/docs/docs/secretkeyboxencryption)
 and [@fastify/cookie](https://github.com/fastify/fastify-cookie).
 
 ## Using a pregenerated key
