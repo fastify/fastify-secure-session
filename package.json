@@ -1,6 +1,6 @@
 {
   "name": "@fastify/secure-session",
-  "version": "6.2.0",
+  "version": "7.0.0",
   "description": "Create a secure stateless cookie session for Fastify",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -33,7 +33,7 @@
     "@fastify/pre-commit": "^2.0.2",
     "@types/node": "^20.1.0",
     "cookie": "^0.5.0",
-    "fastify": "^4.0.0-rc.2",
+    "fastify": "^4.0.0",
     "standard": "^17.0.0",
     "tap": "^16.1.0",
     "tsd": "^0.28.0"
