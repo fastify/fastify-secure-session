@@ -212,7 +212,7 @@ IMPORTANT: The new key you are trying to rotate to should always be the first ke
 ```js
 // first time running the app
 fastify.register(require('@fastify/secure-session'), {
-  key: [mySecureKey]
+  key: [mySecureKey],
 
   cookie: {
     path: '/'
@@ -228,7 +228,7 @@ do the following:
 ```js
 // first time running the app
 fastify.register(require('@fastify/secure-session'), {
-  key: [myNewKey, mySecureKey]
+  key: [myNewKey, mySecureKey],
 
   cookie: {
     path: '/'
