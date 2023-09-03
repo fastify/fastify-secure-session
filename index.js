@@ -298,6 +298,10 @@ class Session {
   data () {
     return this[kObj]
   }
+
+  touch () {
+    this.changed = true
+  }
 }
 
 function genNonce () {
