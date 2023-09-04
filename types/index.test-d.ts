@@ -43,12 +43,14 @@ app.get("/not-websockets", async (request, reply) => {
   expectType<SessionData | undefined>(request.session.data());
   request.session.delete();
   request.session.options({ maxAge: 42 })
+  request.session.touch();
 
   request.foo.set("foo", "bar");
   expectType<string | undefined>(request.foo.get("foo"));
   expectType<any>(request.foo.get("baz"));
   request.foo.delete();
   request.foo.options({ maxAge: 42 });
+  request.foo.touch();
 });
 
 expectType<Session | null>(app.decodeSecureSession("some cookie"))

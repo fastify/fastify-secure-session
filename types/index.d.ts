@@ -26,6 +26,7 @@ declare namespace fastifySecureSession {
     data(): T | undefined;
     delete(): void;
     options(opts: CookieSerializeOptions): void;
+    touch(): void;
   }
 
   export interface SessionData {

@@ -77,6 +77,15 @@ fastify.get('/', (request, reply) => {
   reply.send(data)
 })
 
+fastify.get('/ping', (request, reply) => {
+  request.session.options({maxAge: 3600})
+  
+  // Send the session cookie to the client even if the session data didn't change
+  // can be used to update cookie expiration
+  request.session.touch()
+  reply.send('pong')
+})
+
 fastify.post('/logout', (request, reply) => {
   request.session.delete()
   reply.send('logged out')
@@ -203,7 +212,7 @@ IMPORTANT: The new key you are trying to rotate to should always be the first ke
 ```js
 // first time running the app
 fastify.register(require('@fastify/secure-session'), {
-  key: [mySecureKey]
+  key: [mySecureKey],
 
   cookie: {
     path: '/'
@@ -219,7 +228,7 @@ do the following:
 ```js
 // first time running the app
 fastify.register(require('@fastify/secure-session'), {
-  key: [myNewKey, mySecureKey]
+  key: [myNewKey, mySecureKey],
 
   cookie: {
     path: '/'
