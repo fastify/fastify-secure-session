@@ -43,8 +43,8 @@ Then, register the plugin as follows:
 'use strict'
 
 const fastify = require('fastify')({ logger: false })
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
 fastify.register(require('@fastify/secure-session'), {
   // the name of the attribute decorated on the request-object, defaults to 'session'
@@ -248,7 +248,7 @@ npx @fastify/secure-session > secret-key2
 ```
 
 ```js
-const fs = require('fs')
+const fs = require('node:fs')
 const fastify = require('fastify')({ logger: false })
 
 const key1 = fs.readFileSync(path.join(__dirname, 'secret-key1'))
