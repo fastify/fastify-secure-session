@@ -1,9 +1,9 @@
 'use strict'
 
 const fastify = require('fastify')({ logger: false })
-const fs = require('fs')
-const path = require('path')
-const assert = require('assert')
+const fs = require('node:fs')
+const path = require('node:path')
+const assert = require('node:assert')
 
 fastify.register(require('../..'), {
   key: fs.readFileSync(path.join(__dirname, 'example-key'))
