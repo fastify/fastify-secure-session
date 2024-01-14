@@ -92,7 +92,7 @@ fastify.post('/logout', (request, reply) => {
 })
 ```
 
-If you enable [`debug` level logging](https://www.fastify.dev/docs/latest/Reference/Logging/),
+If you enable [`debug` level logging](https://fastify.dev/docs/latest/Reference/Logging/),
 you will see what steps the library is doing and understand why a session you
 expect to be there is not present. For extra details, you can also enable `trace`
 level logging.
