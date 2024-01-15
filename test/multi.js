@@ -20,7 +20,7 @@ tap.test('it should handle multiple sessions properly', t => {
     cookie: {
       path: '/',
       maxAge: 60,
-      domain: 'fastify.io'
+      domain: 'fastify.dev'
     },
     sessionName: 'shortTermSession'
   }])
@@ -68,7 +68,7 @@ tap.test('it should handle multiple sessions properly', t => {
 
     t.equal(response.cookies[1].name, 'short-term-cookie')
     t.equal(response.cookies[1].maxAge, 60)
-    t.equal(response.cookies[1].domain, 'fastify.io')
+    t.equal(response.cookies[1].domain, 'fastify.dev')
 
     fastify.inject({
       method: 'GET',
