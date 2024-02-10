@@ -35,10 +35,13 @@ app.get("/not-websockets", async (request, reply) => {
   expectType<FastifyRequest>(request);
   expectType<FastifyReply>(reply);
   expectType<Session>(request.session);
+  // @ts-expect-error  undefined key
+  request.session.set("baz", "bar");
   request.session.set("foo", "bar");
   expectType<string | undefined>(request.session.get("foo"));
   expectType<any>(request.session.get("baz"));
   expectType<string | undefined>(request.session.foo);
+  // @ts-expect-error  undefined key
   expectType<any>(request.session.baz);
   expectType<SessionData | undefined>(request.session.data());
   request.session.delete();
