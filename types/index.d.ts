@@ -15,6 +15,7 @@ declare module "fastify" {
 }
 
 type FastifySecureSession = FastifyPluginCallback<fastifySecureSession.SecureSessionPluginOptions | (fastifySecureSession.SecureSessionPluginOptions & Required<Pick<fastifySecureSession.SecureSessionPluginOptions, 'sessionName'>>)[]>;
+interface SessionData {}
 
 declare namespace fastifySecureSession {
   export type Session<T = SessionData> = Partial<T> & {
@@ -27,10 +28,6 @@ declare namespace fastifySecureSession {
     delete(): void;
     options(opts: CookieSerializeOptions): void;
     touch(): void;
-  }
-
-  export interface SessionData {
-    [key: string]: any;
   }
 
   export type SecureSessionPluginOptions = {

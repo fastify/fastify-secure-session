@@ -39,7 +39,6 @@ app.get("/not-websockets", async (request, reply) => {
   expectType<string | undefined>(request.session.get("foo"));
   expectType<any>(request.session.get("baz"));
   expectType<string | undefined>(request.session.foo);
-  expectType<any>(request.session.baz);
   expectType<SessionData | undefined>(request.session.data());
   request.session.delete();
   request.session.options({ maxAge: 42 })
@@ -51,6 +50,13 @@ app.get("/not-websockets", async (request, reply) => {
   request.foo.delete();
   request.foo.options({ maxAge: 42 });
   request.foo.touch();
+
+  // @ts-expect-error: set undefined key
+  request.session.set("baz", "bar");
+  // @ts-expect-error: invoke undefined key
+  expectType<any>(request.session.baz);
+  // @ts-expect-error: invoke undefined key
+  request.baz.touch()
 });
 
 expectType<Session | null>(app.decodeSecureSession("some cookie"))
