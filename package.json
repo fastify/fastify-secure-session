@@ -1,6 +1,6 @@
 {
   "name": "@fastify/secure-session",
-  "version": "7.1.0",
+  "version": "7.2.0",
   "description": "Create a secure stateless cookie session for Fastify",
   "main": "index.js",
   "type": "commonjs",
