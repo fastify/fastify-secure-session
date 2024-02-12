@@ -331,7 +331,7 @@ fastify.decodeSecureSession(request.cookies['session'], undefined, 'mySecondSess
 
 ## Add TypeScript types
 
-The session data is defined as interface `SessionData`. To extended `SessionData` with [declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html) for improved type support.
+The session data is defined as an interface called `SessionData`. It can be extended with [declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html) for improved type support.
 
 ```ts
 declare module '@fastify/secure-session' {
