@@ -31,18 +31,18 @@
   },
   "homepage": "https://github.com/fastify/fastify-secure-session#readme",
   "devDependencies": {
-    "@fastify/pre-commit": "^2.0.2",
-    "@types/node": "^20.1.0",
+    "@fastify/pre-commit": "^2.1.0",
+    "@types/node": "^20.11.30",
     "cookie": "^0.6.0",
-    "fastify": "^4.0.0",
-    "standard": "^17.0.0",
-    "tap": "^16.1.0",
-    "tsd": "^0.30.0"
+    "fastify": "^4.26.2",
+    "standard": "^17.1.0",
+    "tap": "^18.7.1",
+    "tsd": "^0.30.7"
   },
   "dependencies": {
-    "@fastify/cookie": "^9.0.4",
-    "fastify-plugin": "^4.0.0",
-    "sodium-native": "^4.0.0"
+    "@fastify/cookie": "^9.3.1",
+    "fastify-plugin": "^4.5.1",
+    "sodium-native": "^4.0.10"
   },
   "publishConfig": {
     "access": "public"
