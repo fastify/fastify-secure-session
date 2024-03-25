@@ -5,35 +5,6 @@ const sodium = require('sodium-native')
 const kObj = Symbol('object')
 const kCookieOptions = Symbol('cookie options')
 
-function createObjectProxyHandler (sessionTarget) {
-  const proxyCache = new WeakMap()
-  function createHandler () {
-    return {
-      get (target, prop, receiver) {
-        const value = Reflect.get(target, prop, receiver)
-        if (typeof value === 'object' && value !== null) {
-          if (proxyCache.has(value)) {
-            return proxyCache.get(value)
-          }
-          const proxy = new Proxy(value, createHandler())
-          proxyCache.set(value, proxy)
-          return proxy
-        }
-        return value
-      },
-      set (target, prop, value, receiver) {
-        sessionTarget.touch()
-        return Reflect.set(target, prop, value, receiver)
-      },
-      deleteProperty (target, prop) {
-        sessionTarget.touch()
-        return Reflect.deleteProperty(target, prop)
-      }
-    }
-  }
-  return createHandler()
-}
-
 function fastifySecureSession (fastify, options, next) {
   if (!Array.isArray(options)) {
     options = [options]
@@ -346,6 +317,35 @@ class Session {
   touch () {
     this.changed = true
   }
+}
+
+function createObjectProxyHandler (sessionTarget) {
+  const proxyCache = new WeakMap()
+  function createHandler () {
+    return {
+      get (target, prop, receiver) {
+        const value = Reflect.get(target, prop, receiver)
+        if (typeof value === 'object' && value !== null) {
+          if (proxyCache.has(value)) {
+            return proxyCache.get(value)
+          }
+          const proxy = new Proxy(value, createHandler())
+          proxyCache.set(value, proxy)
+          return proxy
+        }
+        return value
+      },
+      set (target, prop, value, receiver) {
+        sessionTarget.touch()
+        return Reflect.set(target, prop, value, receiver)
+      },
+      deleteProperty (target, prop) {
+        sessionTarget.touch()
+        return Reflect.deleteProperty(target, prop)
+      }
+    }
+  }
+  return createHandler()
 }
 
 function genNonce () {
