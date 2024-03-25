@@ -5,32 +5,36 @@ const sodium = require('sodium-native')
 const kObj = Symbol('object')
 const kCookieOptions = Symbol('cookie options')
 
-const proxyCache = new WeakMap()
-function createProxyHandler (sessionTarget) {
-  return {
-    get (target, prop, receiver) {
-      const value = Reflect.get(target, prop, receiver)
-      if (typeof value === 'object' && value !== null) {
-        if (proxyCache.has(value)) {
-          return proxyCache.get(value)
+function createObjectProxyHandler (sessionTarget) {
+  const proxyCache = new WeakMap()
+  function createHandler () {
+    return {
+      get (target, prop, receiver) {
+        const value = Reflect.get(target, prop, receiver)
+        if (typeof value === 'object' && value !== null) {
+          if (proxyCache.has(value)) {
+            return proxyCache.get(value)
+          }
+          const proxy = new Proxy(value, createHandler())
+          proxyCache.set(value, proxy)
+          return proxy
         }
-        const proxy = new Proxy(value, createProxyHandler(sessionTarget))
-        proxyCache.set(value, proxy)
-        return proxy
+        return value
+      },
+      set (target, prop, value, receiver) {
+        sessionTarget.touch()
+        return Reflect.set(target, prop, value, receiver)
+      },
+      deleteProperty (target, prop) {
+        sessionTarget.touch()
+        return Reflect.deleteProperty(target, prop)
       }
-      return value
-    },
-    set (target, prop, value, receiver) {
-      sessionTarget.touch()
-      return Reflect.set(target, prop, value, receiver)
-    },
-    deleteProperty (target, prop) {
-      sessionTarget.touch()
-      return Reflect.deleteProperty(target, prop)
     }
   }
+  return createHandler()
 }
 
+const sessionProxyCache = new WeakMap()
 // allows us to use property getters and setters as well as get and set methods on session object
 const sessionProxyHandler = {
   get (target, prop) {
@@ -45,11 +49,11 @@ const sessionProxyHandler = {
 
     // Accessing instances to objects within session will be proxied and update session object
     if (typeof target[prop] === 'object' && target[prop] !== null) {
-      if (proxyCache.has(target[prop])) {
-        return proxyCache.get(target[prop])
+      if (sessionProxyCache.has(target[prop])) {
+        return sessionProxyCache.get(target[prop])
       }
-      const proxy = new Proxy(target[prop], createProxyHandler(target))
-      proxyCache.set(target[prop], proxy)
+      const proxy = new Proxy(target[prop], createObjectProxyHandler(target))
+      sessionProxyCache.set(target[prop], proxy)
       return proxy
     }
 
