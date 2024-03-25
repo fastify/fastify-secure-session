@@ -34,54 +34,6 @@ function createObjectProxyHandler (sessionTarget) {
   return createHandler()
 }
 
-const sessionProxyCache = new WeakMap()
-// allows us to use property getters and setters as well as get and set methods on session object
-const sessionProxyHandler = {
-  get (target, prop) {
-    // Calling functions eg request[sessionName].get('key') or request[sessionName].set('key', 'value')
-    if (typeof target[prop] === 'function') {
-      return new Proxy(target[prop], {
-        apply (applyTarget, thisArg, args) {
-          return Reflect.apply(applyTarget, target, args)
-        }
-      })
-    }
-
-    // Accessing instances to objects within session will be proxied and update session object
-    if (typeof target[prop] === 'object' && target[prop] !== null) {
-      if (sessionProxyCache.has(target[prop])) {
-        return sessionProxyCache.get(target[prop])
-      }
-      const proxy = new Proxy(target[prop], createObjectProxyHandler(target))
-      sessionProxyCache.set(target[prop], proxy)
-      return proxy
-    }
-
-    // accessing own properties, eg request[sessionName].changed
-    if (Object.prototype.hasOwnProperty.call(target, prop)) {
-      return target[prop]
-    }
-
-    // accessing session property
-    return target.get(prop)
-  },
-  set (target, prop, value) {
-    // modifying own properties, eg request[sessionName].changed
-    if (Object.prototype.hasOwnProperty.call(target, prop)) {
-      target[prop] = value
-      return true
-    }
-
-    // modifying session property
-    target.set(prop, value)
-    return true
-  },
-  deleteProperty (target, prop) {
-    target.touch()
-    return Reflect.deleteProperty(target, prop)
-  }
-}
-
 function fastifySecureSession (fastify, options, next) {
   if (!Array.isArray(options)) {
     options = [options]
@@ -169,6 +121,54 @@ function fastifySecureSession (fastify, options, next) {
 
     if (!defaultSessionName) {
       defaultSessionName = sessionName
+    }
+  }
+
+  const sessionProxyCache = new WeakMap()
+  // allows us to use property getters and setters as well as get and set methods on session object
+  const sessionProxyHandler = {
+    get (target, prop) {
+      // Calling functions eg request[sessionName].get('key') or request[sessionName].set('key', 'value')
+      if (typeof target[prop] === 'function') {
+        return new Proxy(target[prop], {
+          apply (applyTarget, thisArg, args) {
+            return Reflect.apply(applyTarget, target, args)
+          }
+        })
+      }
+
+      // Accessing instances to objects within session will be proxied and update session object
+      if (typeof target[prop] === 'object' && target[prop] !== null) {
+        if (sessionProxyCache.has(target[prop])) {
+          return sessionProxyCache.get(target[prop])
+        }
+        const proxy = new Proxy(target[prop], createObjectProxyHandler(target))
+        sessionProxyCache.set(target[prop], proxy)
+        return proxy
+      }
+
+      // accessing own properties, eg request[sessionName].changed
+      if (Object.prototype.hasOwnProperty.call(target, prop)) {
+        return target[prop]
+      }
+
+      // accessing session property
+      return target.get(prop)
+    },
+    set (target, prop, value) {
+      // modifying own properties, eg request[sessionName].changed
+      if (Object.prototype.hasOwnProperty.call(target, prop)) {
+        target[prop] = value
+        return true
+      }
+
+      // modifying session property
+      target.set(prop, value)
+      return true
+    },
+    deleteProperty (target, prop) {
+      target.touch()
+      return Reflect.deleteProperty(target, prop)
     }
   }
 
