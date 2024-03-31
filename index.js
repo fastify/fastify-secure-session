@@ -103,11 +103,15 @@ function fastifySecureSession (fastify, options, next) {
         return next(new Error(`key lengths must be ${sodium.crypto_secretbox_KEYBYTES} bytes`))
       }
 
+      const outputHash = Buffer.alloc(sodium.crypto_generichash_BYTES)
+
       if (Array.isArray(key)) {
-        defaultSecret = key[0].toString('hex')
+        sodium.crypto_generichash(outputHash, key[0])
       } else {
-        defaultSecret = key.toString('hex')
+        sodium.crypto_generichash(outputHash, key)
       }
+
+      defaultSecret = outputHash.toString('hex')
     }
 
     if (!key) {
