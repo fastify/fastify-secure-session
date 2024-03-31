@@ -53,13 +53,10 @@ function fastifySecureSession (fastify, options, next) {
     const cookieOptions = sessionOptions.cookieOptions || sessionOptions.cookie || {}
 
     let key
-    if (sessionOptions.secret) {
+
+    if (sessionOptions.secret && !sessionOptions.key) {
       if (Buffer.byteLength(sessionOptions.secret) < 32) {
         return next(new Error('secret must be at least 32 bytes'))
-      }
-
-      if (!defaultSecret) {
-        defaultSecret = sessionOptions.secret
       }
 
       key = Buffer.allocUnsafe(sodium.crypto_secretbox_KEYBYTES)
@@ -82,6 +79,8 @@ function fastifySecureSession (fastify, options, next) {
         sodium.crypto_pwhash_OPSLIMIT_MODERATE,
         sodium.crypto_pwhash_MEMLIMIT_MODERATE,
         sodium.crypto_pwhash_ALG_DEFAULT)
+
+      defaultSecret = sessionOptions.secret
     }
 
     if (sessionOptions.key) {
@@ -102,6 +101,12 @@ function fastifySecureSession (fastify, options, next) {
         return next(new Error(`key must be ${sodium.crypto_secretbox_KEYBYTES} bytes`))
       } else if (Array.isArray(key) && key.every(isBufferKeyLengthInvalid)) {
         return next(new Error(`key lengths must be ${sodium.crypto_secretbox_KEYBYTES} bytes`))
+      }
+
+      if (Array.isArray(key)) {
+        defaultSecret = key[0].toString('hex')
+      } else {
+        defaultSecret = key.toString('hex')
       }
     }
 
