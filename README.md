@@ -53,6 +53,9 @@ fastify.register(require('@fastify/secure-session'), {
   cookieName: 'my-session-cookie',
   // adapt this to point to the directory where secret-key is located
   key: fs.readFileSync(path.join(__dirname, 'secret-key')),
+  // the amount of time the session is considered valid; this is different from the cookie options
+  // and based on value wihin the session.
+  expiry: 24 * 60 * 60, // Default 1 day
   cookie: {
     path: '/'
     // options for setCookie, see https://github.com/fastify/fastify-cookie
@@ -365,9 +368,12 @@ fastify.get('/', (request, reply) => {
 })
 ```
 
-## TODO
+## Security Notice
 
-- [ ] add an option to just sign, and do not encrypt
+`@fastify/secure-session` stores the session within a cookie, and as a result an attacker could impersonate a user
+if the cookie is leaked. The maximum expiration time of the session is set by the `expiry` option, which has default
+1 day. Adjust this parameter accordingly.
+Moreover, to protect users from further attacks, all cookies are created as "http only" if not specified otherwise.
 
 ## License
 

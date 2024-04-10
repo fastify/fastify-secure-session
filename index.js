@@ -50,7 +50,12 @@ function fastifySecureSession (fastify, options, next) {
   for (const sessionOptions of options) {
     const sessionName = sessionOptions.sessionName || 'session'
     const cookieName = sessionOptions.cookieName || sessionName
+    const expiry = sessionOptions.expiry || 86401 // 24 hours
     const cookieOptions = sessionOptions.cookieOptions || sessionOptions.cookie || {}
+
+    if (cookieOptions.httpOnly === undefined) {
+      cookieOptions.httpOnly = true
+    }
 
     let key
     if (sessionOptions.secret) {
@@ -120,7 +125,8 @@ function fastifySecureSession (fastify, options, next) {
     sessionNames.set(sessionName, {
       cookieName,
       cookieOptions,
-      key
+      key,
+      expiry
     })
 
     if (!defaultSessionName) {
@@ -139,7 +145,7 @@ function fastifySecureSession (fastify, options, next) {
       throw new Error('Unknown session key.')
     }
 
-    const { key } = sessionNames.get(sessionName)
+    const { key, expiry } = sessionNames.get(sessionName)
 
     // do not use destructuring or it will deopt
     const split = cookie.split(';')
@@ -184,8 +190,15 @@ function fastifySecureSession (fastify, options, next) {
       return null
     }
 
+    const parsed = JSON.parse(msg)
+    if ((parsed.__ts + expiry) * 1000 - Date.now() <= 0) {
+      // maximum validity is reached, resetting
+      log.debug('@fastify/secure-session: expiry reached')
+      return null
+    }
     const session = new Proxy(new Session(JSON.parse(msg)), sessionProxyHandler)
     session.changed = signingKeyRotated
+
     return session
   })
 
@@ -228,7 +241,7 @@ function fastifySecureSession (fastify, options, next) {
         const cookie = request.cookies[cookieName]
         const result = fastify.decodeSecureSession(cookie, request.log, sessionName)
 
-        request[sessionName] = new Proxy((result || new Session({})), sessionProxyHandler)
+        request[sessionName] = result || new Proxy(new Session({}), sessionProxyHandler)
       }
 
       next()
@@ -275,6 +288,10 @@ class Session {
     this[kCookieOptions] = null
     this.changed = false
     this.deleted = false
+
+    if (this[kObj].__ts === undefined) {
+      this[kObj].__ts = Math.round(Date.now() / 1000)
+    }
   }
 
   get (key) {
@@ -296,7 +313,12 @@ class Session {
   }
 
   data () {
-    return this[kObj]
+    const copy = {
+      ...this[kObj]
+    }
+
+    delete copy.__ts
+    return copy
   }
 
   touch () {
