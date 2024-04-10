@@ -180,6 +180,150 @@ t.test('session is changed', t => {
   })
 })
 
+t.test('session is changed when property is modified using delete operator', t => {
+  t.plan(8)
+  const fastify = Fastify()
+  fastify.register(SecureSessionPlugin, {
+    key
+  })
+  t.teardown(fastify.close.bind(fastify))
+
+  fastify.post('/', (request, reply) => {
+    request.session.data1 = request.body
+    const changed = request.session.changed
+
+    if (!changed) {
+      reply.code(404).send()
+      return
+    }
+
+    reply.send(changed)
+  })
+
+  fastify.post('/delete', (request, reply) => {
+    delete request.session.data1
+    const changed = request.session.changed
+
+    if (!changed) {
+      reply.code(404).send()
+      return
+    }
+
+    reply.send(changed)
+  })
+
+  fastify.inject({
+    method: 'POST',
+    url: '/',
+    payload: {
+      some: 'data'
+    }
+  }, (error, response) => {
+    t.error(error)
+    t.equal(response.statusCode, 200)
+    t.ok(response.headers['set-cookie'])
+    t.same(JSON.parse(response.payload), true)
+
+    fastify.inject({
+      method: 'POST',
+      url: '/delete',
+      headers: {
+        cookie: response.headers['set-cookie']
+      }
+    }, (error, response) => {
+      t.error(error)
+      t.equal(response.statusCode, 200)
+      t.ok(response.headers['set-cookie'])
+      t.same(JSON.parse(response.payload), true)
+    })
+  })
+})
+
+t.test('session is changed when property is a nested object which is modified or deleted', t => {
+  t.plan(12)
+  const fastify = Fastify()
+  fastify.register(SecureSessionPlugin, {
+    key
+  })
+  t.teardown(fastify.close.bind(fastify))
+
+  fastify.post('/', (request, reply) => {
+    request.session.data1 = request.body
+    const changed = request.session.changed
+
+    if (!changed) {
+      reply.code(404).send()
+      return
+    }
+
+    reply.send(changed)
+  })
+
+  fastify.post('/modify', (request, reply) => {
+    request.session.data1.some.first = '2'
+    const changed = request.session.changed
+
+    if (!changed) {
+      reply.code(404).send()
+      return
+    }
+
+    reply.send(changed)
+  })
+
+  fastify.post('/delete', (request, reply) => {
+    delete request.session.data1.some.first
+    const changed = request.session.changed
+
+    if (!changed) {
+      reply.code(404).send()
+      return
+    }
+
+    reply.send(changed)
+  })
+
+  // handle modification of nested objects
+  fastify.inject({
+    method: 'POST',
+    url: '/',
+    payload: {
+      some: { first: '1' }
+    }
+  }, (error, response) => {
+    t.error(error)
+    t.equal(response.statusCode, 200)
+    t.ok(response.headers['set-cookie'])
+    t.same(JSON.parse(response.payload), true)
+
+    fastify.inject({
+      method: 'POST',
+      url: '/modify',
+      headers: {
+        cookie: response.headers['set-cookie']
+      }
+    }, (error, response) => {
+      t.error(error)
+      t.equal(response.statusCode, 200)
+      t.ok(response.headers['set-cookie'])
+      t.same(JSON.parse(response.payload), true)
+
+      fastify.inject({
+        method: 'POST',
+        url: '/delete',
+        headers: {
+          cookie: response.headers['set-cookie']
+        }
+      }, (error, response) => {
+        t.error(error)
+        t.equal(response.statusCode, 200)
+        t.ok(response.headers['set-cookie'])
+        t.same(JSON.parse(response.payload), true)
+      })
+    })
+  })
+})
+
 t.test('session is deleted', t => {
   t.plan(5)
   const fastify = Fastify()
