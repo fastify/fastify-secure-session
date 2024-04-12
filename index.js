@@ -246,8 +246,17 @@ function fastifySecureSession (fastify, options, next) {
     // the hooks must be registered after @fastify/cookie hooks
 
     fastify.addHook('onRequest', (request, reply, next) => {
-      for (const [sessionName, { cookieName }] of sessionNames.entries()) {
-        const cookie = request.cookies[cookieName]
+      for (const [sessionName, { cookieName, cookieOptions }] of sessionNames.entries()) {
+        let cookie = request.cookies[cookieName]
+
+        if (cookie !== undefined && cookieOptions.signed === true) {
+          const unsignedCookie = fastify.unsignCookie(cookie)
+
+          if (unsignedCookie.valid === true) {
+            cookie = unsignedCookie.value
+          }
+        }
+
         const result = fastify.decodeSecureSession(cookie, request.log, sessionName)
 
         request[sessionName] = result || new Proxy(new Session({}), sessionProxyHandler)
