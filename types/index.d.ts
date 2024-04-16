@@ -34,6 +34,7 @@ declare namespace fastifySecureSession {
     cookie?: CookieSerializeOptions
     cookieName?: string
     sessionName?: string
+    expiry?: number
   } & ({ key: string | Buffer | (string | Buffer)[] } | {
     secret: string | Buffer,
     salt: string | Buffer
