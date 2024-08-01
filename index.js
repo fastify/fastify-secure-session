@@ -369,7 +369,7 @@ function isBufferKeyLengthInvalid (k) {
 }
 
 module.exports = fp(fastifySecureSession, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: '@fastify/secure-session'
 })
 module.exports.default = fastifySecureSession
