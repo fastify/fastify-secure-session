@@ -32,7 +32,7 @@
   "homepage": "https://github.com/fastify/fastify-secure-session#readme",
   "devDependencies": {
     "@fastify/pre-commit": "^2.0.2",
-    "@sinonjs/fake-timers": "^11.2.2",
+    "@sinonjs/fake-timers": "^13.0.1",
     "@types/node": "^22.0.0",
     "cookie": "^0.6.0",
     "fastify": "^5.0.0-alpha.4",
