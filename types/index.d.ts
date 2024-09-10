@@ -28,6 +28,12 @@ declare namespace fastifySecureSession {
     delete(): void;
     options(opts: CookieSerializeOptions): void;
     touch(): void;
+    /**
+     * Regenerates the session
+     *
+     * ignoreFields specifies which fields should be kept in the new session object. 
+     */
+    regenerate(ignoreFields?: string[]): void;
   }
 
   export type SecureSessionPluginOptions = {
