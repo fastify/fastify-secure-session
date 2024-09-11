@@ -342,6 +342,16 @@ class Session {
   touch () {
     this.changed = true
   }
+
+  regenerate (ignoredFields) {
+    for (const key of Object.keys(this[kObj])) {
+      if (key === '__ts' || (Array.isArray(ignoredFields) && ignoredFields.includes(key))) {
+        continue
+      }
+      delete this[kObj][key]
+    }
+    this.changed = true
+  }
 }
 
 function genNonce () {
