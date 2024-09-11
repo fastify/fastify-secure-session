@@ -16,5 +16,7 @@ test('not to register `@fastify/cookie` when it is already registered', async t 
     parseOptions: {} // options for parsing cookies
   })
 
-  t.assert.throws(() => fastify.register('../'))
+  t.assert.doesNotReject(() => fastify.register(require('../'), {
+    key
+  }).after())
 })
