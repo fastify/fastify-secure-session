@@ -11,7 +11,7 @@
   "scripts": {
     "lint": "standard",
     "test": "npm run test:unit && npm run test:typescript",
-    "test:unit": "tap test/*.js",
+    "test:unit": "node --test test/*.js",
     "test:typescript": "tsd"
   },
   "repository": {
@@ -37,7 +37,6 @@
     "cookie": "^0.6.0",
     "fastify": "^5.0.0-alpha.4",
     "standard": "^17.1.0",
-    "tap": "^18.7.1",
     "tsd": "^0.31.0"
   },
   "dependencies": {

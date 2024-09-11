@@ -1,15 +1,14 @@
 'use strict'
 
-const tap = require('tap')
+const { test } = require('node:test')
 const sodium = require('sodium-native')
 const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 sodium.randombytes_buf(key)
 
-tap.test('Clears the session data except for specified keys when regenerate is called', async t => {
+test('Clears the session data except for specified keys when regenerate is called', async t => {
   const maxAge = 3600
   const fastify = require('fastify')({ logger: false })
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(3)
+  t.after(() => fastify.close())
 
   await fastify.register(require('../'), {
     key,
@@ -59,7 +58,7 @@ tap.test('Clears the session data except for specified keys when regenerate is c
     }
   })
 
-  t.same(sessionResponse.json(), {
+  t.assert.deepStrictEqual(sessionResponse.json(), {
     user: 'username',
     email: 'me@here.fine'
   })
@@ -80,7 +79,7 @@ tap.test('Clears the session data except for specified keys when regenerate is c
     }
   })
 
-  t.same(sessionAfterRegenPartialResponse.json(), {
+  t.assert.deepStrictEqual(sessionAfterRegenPartialResponse.json(), {
     user: 'username'
   })
 
@@ -99,5 +98,5 @@ tap.test('Clears the session data except for specified keys when regenerate is c
       cookie: regenerateAllResponse.headers['set-cookie']
     }
   })
-  t.same(sessionAfterRegenAllResponse.json(), {})
+  t.assert.deepStrictEqual(sessionAfterRegenAllResponse.json(), {})
 })

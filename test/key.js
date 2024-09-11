@@ -1,53 +1,41 @@
 'use strict'
 
-const tap = require('tap')
+const { test } = require('node:test')
 const Fastify = require('fastify')
 const fastifySecureSession = require('..')
 const sodium = require('sodium-native')
 
-tap.test('throws when key is not string array nor a Buffer array', async t => {
-  t.plan(2)
-
+test('throws when key is not string array nor a Buffer array', async t => {
   const fastify = Fastify({ logger: false })
-  t.teardown(fastify.close.bind(fastify))
-
-  await fastify.register(fastifySecureSession, {
+  t.after(() => fastify.close())
+  fastify.register(fastifySecureSession, {
     key: [true]
-  }).after(err => {
-    t.type(err, Error)
-    t.equal(err.message, 'Key must be string or buffer')
   })
+
+  t.assert.rejects(() => fastify.after(), /Key must be string or buffer/)
 })
 
-tap.test('throws when key is not string nor a Buffer', async t => {
-  t.plan(2)
-
+test('throws when key is not string nor a Buffer', async t => {
   const fastify = Fastify({ logger: false })
-  t.teardown(fastify.close.bind(fastify))
-
-  await fastify.register(fastifySecureSession, {
+  t.after(() => fastify.close())
+  fastify.register(fastifySecureSession, {
     key: true
-  }).after(err => {
-    t.type(err, Error)
-    t.equal(err.message, 'key must be a string or a Buffer')
   })
+  t.assert.rejects(() => fastify.after(), /key must be a string or a Buffer/)
 })
 
-tap.test('throws when key is not specified', async t => {
-  t.plan(2)
-
+test('throws when key is not specified', async t => {
   const fastify = Fastify({ logger: false })
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => fastify.close())
 
-  await fastify.register(fastifySecureSession, {
+  fastify.register(fastifySecureSession, {
     key: undefined
-  }).after(err => {
-    t.type(err, Error)
-    t.equal(err.message, 'key or secret must specified')
   })
+
+  t.assert.rejects(() => fastify.after(), /key or secret must specified/)
 })
 
-tap.test('support key length equals to "crypto_secretbox_KEYBYTES" length', t => {
+test('support key length equals to "crypto_secretbox_KEYBYTES" length', async t => {
   const fastify = Fastify({ logger: false })
   const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 
@@ -62,8 +50,7 @@ tap.test('support key length equals to "crypto_secretbox_KEYBYTES" length', t =>
     reply.send('hello world')
   })
 
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(6)
+  t.after(() => fastify.close())
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
@@ -74,37 +61,34 @@ tap.test('support key length equals to "crypto_secretbox_KEYBYTES" length', t =>
     reply.send(data)
   })
 
-  fastify.inject({
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
-    const { name } = response.cookies[0]
-    t.equal(name, 'session')
-
-    fastify.inject({
-      method: 'GET',
-      url: '/',
-      headers: {
-        cookie: response.headers['set-cookie']
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.same(JSON.parse(response.payload), { some: 'data' })
-    })
   })
+  t.assert.ifError(postResponse.error)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
+  const { name } = postResponse.cookies[0]
+  t.assert.strictEqual(name, 'session')
+
+  const getResponse = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      cookie: postResponse.headers['set-cookie']
+    }
+  })
+  t.assert.ifError(getResponse.error)
+  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), { some: 'data' })
 })
 
-tap.test('does not support key length shorter than sodium "crypto_secretbox_KEYBYTES"', async t => {
+test('does not support key length shorter than sodium "crypto_secretbox_KEYBYTES"', async t => {
   const fastify = Fastify({ logger: false })
 
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(1)
+  t.after(() => fastify.close())
 
   const arbitraryOffset = 5
   const keyWithNotEnoughLength = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES - arbitraryOffset)
@@ -115,14 +99,13 @@ tap.test('does not support key length shorter than sodium "crypto_secretbox_KEYB
     key: keyWithNotEnoughLength
   })
 
-  await t.rejects(() => fastify.after())
+  await t.assert.rejects(() => fastify.after(), /key must be 32 bytes/)
 })
 
-tap.test('does not support key length greater than sodium "crypto_secretbox_KEYBYTES"', async t => {
+test('does not support key length greater than sodium "crypto_secretbox_KEYBYTES"', async t => {
   const fastify = Fastify({ logger: false })
 
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(1)
+  t.after(() => fastify.close())
 
   const arbitraryOffset = 5
   const keyWithTooMuchLength = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES + arbitraryOffset)
@@ -133,10 +116,10 @@ tap.test('does not support key length greater than sodium "crypto_secretbox_KEYB
     key: keyWithTooMuchLength
   })
 
-  await t.rejects(() => fastify.after())
+  await t.assert.rejects(() => fastify.after(), /key must be 32 bytes/)
 })
 
-tap.test('signing works with only a key', function (t) {
+test('signing works with only a key', async (t) => {
   const fastify = Fastify({ logger: false })
   const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 
@@ -176,42 +159,38 @@ tap.test('signing works with only a key', function (t) {
     reply.send(data.value)
   })
 
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(7)
+  t.after(() => fastify.close())
 
-  fastify.inject({
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
-
-    const cookieHeader = response.headers['set-cookie'].join(';')
-
-    fastify.inject({
-      method: 'GET',
-      url: '/secure-session',
-      headers: {
-        cookie: cookieHeader
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.same(JSON.parse(response.payload), { some: 'data' })
-
-      fastify.inject({
-        method: 'GET',
-        url: '/cookie-signed',
-        headers: {
-          cookie: cookieHeader
-        }
-      }, (error, response) => {
-        t.error(error)
-        t.same(JSON.parse(response.payload), { some: 'data' })
-      })
-    })
   })
+  t.assert.ifError(postResponse.error)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
+
+  const cookieHeader = postResponse.headers['set-cookie'].join(';')
+
+  const sessionResponse = await fastify.inject({
+    method: 'GET',
+    url: '/secure-session',
+    headers: {
+      cookie: cookieHeader
+    }
+  })
+  t.assert.ifError(sessionResponse.error)
+  t.assert.deepStrictEqual(JSON.parse(sessionResponse.payload), { some: 'data' })
+
+  const cookieResponse = await fastify.inject({
+    method: 'GET',
+    url: '/cookie-signed',
+    headers: {
+      cookie: cookieHeader
+    }
+  })
+  t.assert.ifError(cookieResponse.error)
+  t.assert.deepStrictEqual(JSON.parse(cookieResponse.payload), { some: 'data' })
 })

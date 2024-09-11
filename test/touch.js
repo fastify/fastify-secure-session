@@ -1,16 +1,15 @@
 'use strict'
 
-const tap = require('tap')
+const { test } = require('node:test')
 const sodium = require('sodium-native')
 const cookie = require('cookie')
 const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 sodium.randombytes_buf(key)
 
-tap.test('Sends cookies when touch is invoked and session data has not changed', async t => {
+test('Sends cookies when touch is invoked and session data has not changed', async t => {
   const maxAge = 3600
   const fastify = require('fastify')({ logger: false })
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(8)
+  t.after(() => fastify.close())
 
   await fastify.register(require('../'), {
     key,
@@ -38,18 +37,18 @@ tap.test('Sends cookies when touch is invoked and session data has not changed',
     }
   })
 
-  t.equal(loginResponse.statusCode, 200)
-  t.ok(loginResponse.headers['set-cookie'])
-  t.equal(cookie.parse(loginResponse.headers['set-cookie']).Path, '/')
-  t.equal(cookie.parse(loginResponse.headers['set-cookie'])['Max-Age'], `${maxAge}`)
+  t.assert.strictEqual(loginResponse.statusCode, 200)
+  t.assert.ok(loginResponse.headers['set-cookie'])
+  t.assert.strictEqual(cookie.parse(loginResponse.headers['set-cookie']).Path, '/')
+  t.assert.strictEqual(cookie.parse(loginResponse.headers['set-cookie'])['Max-Age'], `${maxAge}`)
 
   const pingResponse = await fastify.inject({
     method: 'GET',
     url: '/ping'
   })
 
-  t.equal(pingResponse.statusCode, 200)
-  t.ok(pingResponse.headers['set-cookie'])
-  t.equal(cookie.parse(loginResponse.headers['set-cookie']).Path, '/')
-  t.equal(cookie.parse(loginResponse.headers['set-cookie'])['Max-Age'], `${maxAge}`)
+  t.assert.strictEqual(pingResponse.statusCode, 200)
+  t.assert.ok(pingResponse.headers['set-cookie'])
+  t.assert.strictEqual(cookie.parse(loginResponse.headers['set-cookie']).Path, '/')
+  t.assert.strictEqual(cookie.parse(loginResponse.headers['set-cookie'])['Max-Age'], `${maxAge}`)
 })

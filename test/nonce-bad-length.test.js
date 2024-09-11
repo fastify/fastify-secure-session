@@ -1,47 +1,48 @@
 'use strict'
 
-const t = require('tap')
-const fastify = require('fastify')({ logger: false })
+const { test } = require('node:test')
+const Fastify = require('fastify')
 const sodium = require('sodium-native')
 const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 
 sodium.randombytes_buf(key)
 
-fastify.register(require('../'), {
-  key
-})
+test('handles invalid length cookie', async (t) => {
+  const fastify = Fastify({ logger: false })
 
-fastify.get('/get', (request, reply) => {
-  const data = request.session.get('data')
-  reply.send(data)
-})
+  fastify.register(require('../'), {
+    key
+  })
 
-fastify.get('/set', (request, reply) => {
-  request.session.set('data', { hello: 'world' })
-  reply.send('hello world')
-})
+  fastify.get('/get', (request, reply) => {
+    const data = request.session.get('data')
+    reply.send(data)
+  })
 
-t.teardown(fastify.close.bind(fastify))
-t.plan(5)
+  fastify.get('/set', (request, reply) => {
+    request.session.set('data', { hello: 'world' })
+    reply.send('hello world')
+  })
 
-fastify.inject({
-  method: 'GET',
-  url: '/set'
-}, (error, response) => {
-  t.error(error)
-  t.equal(response.statusCode, 200)
-  const cookie = response.cookies[0]
+  t.after(() => fastify.close())
 
-  fastify.inject({
+  const setResponse = await fastify.inject({
+    method: 'GET',
+    url: '/set'
+  })
+  t.assert.ifError(setResponse.error)
+  t.assert.strictEqual(setResponse.statusCode, 200)
+  const cookie = setResponse.cookies[0]
+
+  const getResponse = await fastify.inject({
     method: 'GET',
     url: '/get',
     cookies: {
       [cookie.name]: cookie.value + 'a'.repeat(10)
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    // the session is empty, so we expect an empty string
-    t.equal(response.payload, '')
   })
+  t.assert.ifError(getResponse.error)
+  t.assert.strictEqual(getResponse.statusCode, 200)
+  // the session is empty, so we expect an empty string
+  t.assert.strictEqual(getResponse.payload, '')
 })

@@ -1,14 +1,13 @@
 'use strict'
 
-const t = require('tap')
+const { test } = require('node:test')
 const Fastify = require('fastify')
 const sodium = require('sodium-native')
 const SecureSessionPlugin = require('../')
 const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 sodium.randombytes_buf(key)
 
-t.test('Native getting and settings props and getter and setter method both work', t => {
-  t.plan(5)
+test('Native getting and settings props and getter and setter method both work', async t => {
   const fastify = Fastify()
   fastify.register(SecureSessionPlugin, {
     key
@@ -21,7 +20,7 @@ t.test('Native getting and settings props and getter and setter method both work
     reply.send('hello world')
   })
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => fastify.close())
 
   fastify.get('/', (request, reply) => {
     const data1 = request.session.get('data1')
@@ -37,37 +36,35 @@ t.test('Native getting and settings props and getter and setter method both work
     reply.send({ data1, data2, data3, data4 })
   })
 
-  fastify.inject({
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
+  })
+  t.assert.ifError(postResponse.error)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
 
-    fastify.inject({
-      method: 'GET',
-      url: '/',
-      headers: {
-        cookie: response.headers['set-cookie']
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.same(JSON.parse(response.payload), {
-        data1: { some: 'data' },
-        data2: { some: 'data' },
-        data3: { some: 'data' },
-        data4: { some: 'data' }
-      })
-    })
+  const getResponse = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      cookie: postResponse.headers['set-cookie']
+    }
+  })
+
+  t.assert.ifError(getResponse.error)
+  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), {
+    data1: { some: 'data' },
+    data2: { some: 'data' },
+    data3: { some: 'data' },
+    data4: { some: 'data' }
   })
 })
 
-t.test('Get all data that we set in session', t => {
-  t.plan(5)
+test('Get all data that we set in session', async t => {
   const fastify = Fastify()
   fastify.register(SecureSessionPlugin, {
     key
@@ -80,7 +77,7 @@ t.test('Get all data that we set in session', t => {
     reply.send('hello world')
   })
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => fastify.close())
 
   fastify.get('/', (request, reply) => {
     const data = request.session.data()
@@ -93,35 +90,32 @@ t.test('Get all data that we set in session', t => {
     reply.send(data)
   })
 
-  fastify.inject({
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
+  })
+  t.assert.ifError(postResponse.error)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
 
-    fastify.inject({
-      method: 'GET',
-      url: '/',
-      headers: {
-        cookie: response.headers['set-cookie']
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.same(JSON.parse(response.payload), {
-        data1: { some: 'data' },
-        data2: { some: 'data' }
-      })
-    })
+  const getResponse = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      cookie: postResponse.headers['set-cookie']
+    }
+  })
+  t.assert.ifError(getResponse.error)
+  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), {
+    data1: { some: 'data' },
+    data2: { some: 'data' }
   })
 })
 
-t.test('session is changed', t => {
-  t.plan(7)
+test('session is changed', async t => {
   const fastify = Fastify()
   fastify.register(SecureSessionPlugin, {
     key
@@ -141,7 +135,7 @@ t.test('session is changed', t => {
     reply.send(changed)
   })
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => fastify.close())
 
   fastify.get('/', (request, reply) => {
     const changed = request.session.changed
@@ -154,34 +148,33 @@ t.test('session is changed', t => {
     reply.send(changed)
   })
 
-  fastify.inject({
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
-    t.same(JSON.parse(response.payload), true)
-
-    fastify.inject({
-      method: 'GET',
-      url: '/',
-      headers: {
-        cookie: response.headers['set-cookie']
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.notOk(response.headers['set-cookie']) // new cookie should not be issued, since session is unchanged
-      t.same(JSON.parse(response.payload), false)
-    })
   })
+
+  t.assert.ifError(postResponse.error)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
+  t.assert.deepStrictEqual(JSON.parse(postResponse.payload), true)
+
+  const getResponse = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      cookie: postResponse.headers['set-cookie']
+    }
+  })
+
+  t.assert.ifError(getResponse.error)
+  t.assert.strictEqual(getResponse.headers['set-cookie'], undefined) // new cookie should not be issued, since session is unchanged
+  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), false)
 })
 
-t.test('session is deleted', t => {
-  t.plan(5)
+test('session is deleted', async t => {
   const fastify = Fastify()
   fastify.register(SecureSessionPlugin, {
     key
@@ -201,28 +194,26 @@ t.test('session is deleted', t => {
     reply.send(deleted)
   })
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => fastify.close())
 
-  fastify.inject({
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
-
-    fastify.inject({
-      method: 'POST',
-      url: '/delete',
-      headers: {
-        cookie: response.headers['set-cookie']
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.same(JSON.parse(response.payload), true)
-    })
   })
+  t.assert.ifError(postResponse.error)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
+
+  const getResponse = await fastify.inject({
+    method: 'POST',
+    url: '/delete',
+    headers: {
+      cookie: postResponse.headers['set-cookie']
+    }
+  })
+  t.assert.ifError(getResponse.error)
+  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), true)
 })

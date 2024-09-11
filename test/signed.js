@@ -1,10 +1,10 @@
 'use strict'
 
-const tap = require('tap')
+const { test } = require('node:test')
 const fastify = require('fastify')({ logger: false })
 const sodium = require('sodium-native')
 
-tap.test('signed session cookie should works if not tampered with', function (t) {
+test('signed session cookie should works if not tampered with', async (t) => {
   const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
   sodium.randombytes_buf(key)
 
@@ -24,9 +24,6 @@ tap.test('signed session cookie should works if not tampered with', function (t)
     reply.send('done')
   })
 
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(7)
-
   fastify.get('/', (request, reply) => {
     const data = request.session.get('userId')
     if (!data) {
@@ -36,59 +33,47 @@ tap.test('signed session cookie should works if not tampered with', function (t)
     reply.send(data)
   })
 
-  fastify.inject(
-    {
-      method: 'POST',
-      url: '/',
-      payload: {}
-    },
-    (error, response) => {
-      t.error(error)
-      t.equal(response.statusCode, 200)
-      t.ok(response.headers['set-cookie'])
+  t.after(() => fastify.close())
 
-      const { name } = response.cookies[0]
-      t.equal(name, '__Host-session')
+  const postResponse = await fastify.inject({
+    method: 'POST',
+    url: '/',
+    payload: {}
+  })
 
-      const originalCookie = response.headers['set-cookie']
+  t.assert.ifError(postResponse.error)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
 
-      fastify.inject(
-        {
-          method: 'GET',
-          url: '/',
-          headers: {
-            cookie: originalCookie
-          }
-        },
-        (error, response) => {
-          t.error(error)
-          t.same(response.payload, '123')
-        }
-      )
+  const { name } = postResponse.cookies[0]
+  t.assert.strictEqual(name, '__Host-session')
 
-      const cookieContent = originalCookie.split(';')[0]
+  const originalCookie = postResponse.headers['set-cookie']
 
-      // Change the last 5 characters to AAAAA, to tamper with the cookie
-      const cookieContentTampered = cookieContent.slice(0, -5) + 'AAAAA'
-
-      const tamperedCookie = originalCookie.replace(cookieContent, cookieContentTampered)
-
-      fastify.inject(
-        {
-          method: 'GET',
-          url: '/',
-          headers: {
-            cookie: tamperedCookie
-          }
-        },
-        (error, response) => {
-          if (error) {
-            t.fail('Unexpected error: ' + error.message)
-          } else {
-            t.equal(response.statusCode, 404, 'Should fail with tampered cookie')
-          }
-        }
-      )
+  const validGetResponse = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      cookie: originalCookie
     }
-  )
+  })
+  t.assert.ifError(validGetResponse.error)
+  t.assert.deepStrictEqual(validGetResponse.payload, '123')
+
+  const cookieContent = originalCookie.split(';')[0]
+
+  // Change the last 5 characters to AAAAA, to tamper with the cookie
+  const cookieContentTampered = cookieContent.slice(0, -5) + 'AAAAA'
+
+  const tamperedCookie = originalCookie.replace(cookieContent, cookieContentTampered)
+
+  const tamperedGetResponse = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      cookie: tamperedCookie
+    }
+  })
+  t.assert.ifError(tamperedGetResponse.error)
+  t.assert.strictEqual(tamperedGetResponse.statusCode, 404, 'Should fail with tampered cookie')
 })
