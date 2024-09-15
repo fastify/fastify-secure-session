@@ -31,7 +31,7 @@ test('sets path on the cookie', async (t) => {
       some: 'data'
     }
   })
-  t.assert.ifError(response.error)
+  t.assert.ok(response)
   t.assert.strictEqual(response.statusCode, 200)
   t.assert.ok(response.headers['set-cookie'])
   t.assert.strictEqual(cookie.parse(response.headers['set-cookie']).Path, '/')

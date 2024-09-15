@@ -30,7 +30,7 @@ test('handles invalid length cookie', async (t) => {
     method: 'GET',
     url: '/set'
   })
-  t.assert.ifError(setResponse.error)
+  t.assert.ok(setResponse)
   t.assert.strictEqual(setResponse.statusCode, 200)
   const cookie = setResponse.cookies[0]
 
@@ -41,7 +41,7 @@ test('handles invalid length cookie', async (t) => {
       [cookie.name]: cookie.value + 'a'.repeat(10)
     }
   })
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.strictEqual(getResponse.statusCode, 200)
   // the session is empty, so we expect an empty string
   t.assert.strictEqual(getResponse.payload, '')

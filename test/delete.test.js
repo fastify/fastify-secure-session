@@ -53,7 +53,7 @@ test('Deletes the cookie', async (t) => {
       some2: { a: 1, b: undefined, c: 3 }
     }
   })
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
   t.assert.strictEqual(cookie.parse(postResponse.headers['set-cookie']).Path, '/')
@@ -67,7 +67,7 @@ test('Deletes the cookie', async (t) => {
       cookie: postResponse.headers['set-cookie']
     }
   })
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.deepStrictEqual(JSON.parse(getResponse.payload), { some: 'someData', some2: { a: 1, c: 3 } })
 
   const deleteResponse = await fastify.inject({
@@ -77,7 +77,7 @@ test('Deletes the cookie', async (t) => {
       cookie: postResponse.headers['set-cookie']
     }
   })
-  t.assert.ifError(deleteResponse.error)
+  t.assert.ok(deleteResponse)
   t.assert.strictEqual(deleteResponse.statusCode, 200)
   t.assert.ok(deleteResponse.headers['set-cookie'])
   t.assert.strictEqual(cookie.parse(deleteResponse.headers['set-cookie']).Path, '/')

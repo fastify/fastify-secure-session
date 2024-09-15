@@ -41,7 +41,7 @@ test('signed session cookie should works if not tampered with', async (t) => {
     payload: {}
   })
 
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
 
@@ -57,7 +57,7 @@ test('signed session cookie should works if not tampered with', async (t) => {
       cookie: originalCookie
     }
   })
-  t.assert.ifError(validGetResponse.error)
+  t.assert.ok(validGetResponse)
   t.assert.deepStrictEqual(validGetResponse.payload, '123')
 
   const cookieContent = originalCookie.split(';')[0]
@@ -74,6 +74,6 @@ test('signed session cookie should works if not tampered with', async (t) => {
       cookie: tamperedCookie
     }
   })
-  t.assert.ifError(tamperedGetResponse.error)
+  t.assert.ok(tamperedGetResponse)
   t.assert.strictEqual(tamperedGetResponse.statusCode, 404, 'Should fail with tampered cookie')
 })

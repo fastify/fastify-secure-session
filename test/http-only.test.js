@@ -31,7 +31,7 @@ test('http-only override', async t => {
       email: 'me@here.fine'
     }
   })
-  t.assert.ifError(loginResponse.error)
+  t.assert.ok(loginResponse)
   t.assert.strictEqual(loginResponse.statusCode, 200)
   t.assert.ok(loginResponse.headers['set-cookie'])
   t.assert.notEqual(loginResponse.headers['set-cookie'].split(';')[1].trim(), 'HttpOnly')
@@ -72,7 +72,7 @@ test('Override global options does not change httpOnly default', async t => {
       some: 'data'
     }
   })
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
   const { maxAge, path } = postResponse.cookies[0]
@@ -87,6 +87,6 @@ test('Override global options does not change httpOnly default', async t => {
       cookie: postResponse.headers['set-cookie']
     }
   })
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.deepStrictEqual(JSON.parse(getResponse.payload), { some: 'data' })
 })

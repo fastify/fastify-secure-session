@@ -43,7 +43,7 @@ test('Native getting and settings props and getter and setter method both work',
       some: 'data'
     }
   })
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
 
@@ -55,7 +55,7 @@ test('Native getting and settings props and getter and setter method both work',
     }
   })
 
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.deepStrictEqual(JSON.parse(getResponse.payload), {
     data1: { some: 'data' },
     data2: { some: 'data' },
@@ -97,7 +97,7 @@ test('Get all data that we set in session', async t => {
       some: 'data'
     }
   })
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
 
@@ -108,7 +108,7 @@ test('Get all data that we set in session', async t => {
       cookie: postResponse.headers['set-cookie']
     }
   })
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.deepStrictEqual(JSON.parse(getResponse.payload), {
     data1: { some: 'data' },
     data2: { some: 'data' }
@@ -156,7 +156,7 @@ test('session is changed', async t => {
     }
   })
 
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
   t.assert.deepStrictEqual(JSON.parse(postResponse.payload), true)
@@ -169,7 +169,7 @@ test('session is changed', async t => {
     }
   })
 
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.strictEqual(getResponse.headers['set-cookie'], undefined) // new cookie should not be issued, since session is unchanged
   t.assert.deepStrictEqual(JSON.parse(getResponse.payload), false)
 })
@@ -203,7 +203,7 @@ test('session is deleted', async t => {
       some: 'data'
     }
   })
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
 
@@ -214,6 +214,6 @@ test('session is deleted', async t => {
       cookie: postResponse.headers['set-cookie']
     }
   })
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.deepStrictEqual(JSON.parse(getResponse.payload), true)
 })

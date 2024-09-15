@@ -58,7 +58,7 @@ test('it should handle multiple sessions properly', async t => {
     }
   })
 
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
   t.assert.strictEqual(postResponse.cookies.length, 2)
@@ -77,7 +77,7 @@ test('it should handle multiple sessions properly', async t => {
       cookie: postResponse.headers['set-cookie']
     }
   })
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.deepStrictEqual(JSON.parse(getResponse.payload), { some: 'data' })
 
   const deleteResponse = await fastify.inject({
@@ -87,7 +87,7 @@ test('it should handle multiple sessions properly', async t => {
       some: 'data'
     }
   })
-  t.assert.ifError(deleteResponse.error)
+  t.assert.ok(deleteResponse)
   t.assert.strictEqual(deleteResponse.statusCode, 200)
   t.assert.ok(deleteResponse.headers['set-cookie'])
   t.assert.strictEqual(deleteResponse.cookies.length, 2)

@@ -38,7 +38,7 @@ test('supports a schema', async t => {
       bar: 'baz'
     }
   })
-  t.assert.ifError(invalidResponse.error)
+  t.assert.ok(invalidResponse)
   t.assert.strictEqual(invalidResponse.statusCode, 400)
   t.assert.strictEqual(invalidResponse.headers['set-cookie'], undefined)
 
@@ -49,7 +49,7 @@ test('supports a schema', async t => {
       foo: 'bar'
     }
   })
-  t.assert.ifError(validResponse.error)
+  t.assert.ok(validResponse)
   t.assert.strictEqual(validResponse.payload, 'hello world')
   t.assert.ok(validResponse.headers['set-cookie'])
 })

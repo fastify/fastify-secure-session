@@ -98,7 +98,7 @@ test('Anti re-use with set expiry of 15 minutes', async t => {
     }
   })
 
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
 
@@ -112,6 +112,6 @@ test('Anti re-use with set expiry of 15 minutes', async t => {
     }
   })
 
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.deepStrictEqual(JSON.parse(getResponse.payload), {})
 })

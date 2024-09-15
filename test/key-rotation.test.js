@@ -211,7 +211,7 @@ test('signing works with only a string key array', async (t) => {
       some: 'data'
     }
   })
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
 
@@ -224,7 +224,7 @@ test('signing works with only a string key array', async (t) => {
       cookie: cookieHeader
     }
   })
-  t.assert.ifError(sessionResponse.error)
+  t.assert.ok(sessionResponse)
   t.assert.deepStrictEqual(JSON.parse(sessionResponse.payload), { some: 'data' })
 
   const cookieResponse = await fastify.inject({
@@ -234,7 +234,7 @@ test('signing works with only a string key array', async (t) => {
       cookie: cookieHeader
     }
   })
-  t.assert.ifError(cookieResponse.error)
+  t.assert.ok(cookieResponse)
   t.assert.deepStrictEqual(JSON.parse(cookieResponse.payload), { some: 'data' })
 })
 
@@ -290,7 +290,7 @@ test('signing works with only a buffer key array', async (t) => {
       some: 'data'
     }
   })
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
 
@@ -303,7 +303,7 @@ test('signing works with only a buffer key array', async (t) => {
       cookie: cookieHeader
     }
   })
-  t.assert.ifError(sessionResponse.error)
+  t.assert.ok(sessionResponse)
   t.assert.deepStrictEqual(JSON.parse(sessionResponse.payload), { some: 'data' })
 
   const cookieResponse = await fastify.inject({
@@ -313,6 +313,6 @@ test('signing works with only a buffer key array', async (t) => {
       cookie: cookieHeader
     }
   })
-  t.assert.ifError(cookieResponse.error)
+  t.assert.ok(cookieResponse)
   t.assert.deepStrictEqual(JSON.parse(cookieResponse.payload), { some: 'data' })
 })

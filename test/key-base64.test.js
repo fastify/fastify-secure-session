@@ -36,7 +36,7 @@ test('it supports base64 key', async (t) => {
       some: 'data'
     }
   })
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
 
@@ -47,6 +47,6 @@ test('it supports base64 key', async (t) => {
       cookie: postResponse.headers['set-cookie']
     }
   })
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.deepStrictEqual(JSON.parse(getResponse.payload), { some: 'data' })
 })

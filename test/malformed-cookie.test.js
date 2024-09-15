@@ -37,7 +37,7 @@ test('handles a malformed cookie', async (t) => {
     }
   })
 
-  t.assert.ifError(postResponse.error)
+  t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
 
@@ -49,6 +49,6 @@ test('handles a malformed cookie', async (t) => {
     }
   })
 
-  t.assert.ifError(getResponse.error)
+  t.assert.ok(getResponse)
   t.assert.strictEqual(getResponse.statusCode, 404)
 })
