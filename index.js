@@ -205,7 +205,7 @@ function fastifySecureSession (fastify, options, next) {
       log.debug('@fastify/secure-session: expiry reached')
       return null
     }
-    const session = new Proxy(new Session(JSON.parse(msg)), sessionProxyHandler)
+    const session = new Proxy(new Session(parsed), sessionProxyHandler)
     session.changed = signingKeyRotated
 
     return session
