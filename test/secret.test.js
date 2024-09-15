@@ -1,73 +1,71 @@
 'use strict'
 
 const sodium = require('sodium-native')
-const tap = require('tap')
+const { test } = require('node:test')
 
-tap.test('throws when secret is less than 32 bytes', async function (t) {
-  t.plan(2)
-
-  const fastify = require('fastify')({
-    logger: false
-  })
-  t.teardown(fastify.close.bind(fastify))
-
-  await fastify.register(require('../'), {
-    secret: 'a'.repeat(31)
-  }).after((err) => {
-    t.type(err, Error)
-    t.equal(err.message, 'secret must be at least 32 bytes')
-  })
-})
-
-tap.test('not throws when secret is greater than or equal to 32 bytes', async function (t) {
+test('throws when secret is less than 32 bytes', async function (t) {
   t.plan(1)
 
   const fastify = require('fastify')({
     logger: false
   })
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => fastify.close())
 
   await fastify.register(require('../'), {
-    secret: 'a'.repeat(32)
+    secret: 'a'.repeat(31)
   }).after((err) => {
-    t.error(err)
+    t.assert.strictEqual(err.message, 'secret must be at least 32 bytes')
   })
 })
 
-tap.test('throws when salt is less than sodium.crypto_pwhash_SALTBYTES', async function (t) {
-  t.plan(2)
+test('not throws when secret is greater than or equal to 32 bytes', async function (t) {
+  t.plan(1)
 
   const fastify = require('fastify')({
     logger: false
   })
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => fastify.close())
+
+  await fastify.register(require('../'), {
+    secret: 'a'.repeat(32)
+  }).after((err) => {
+    t.assert.ifError(err)
+  })
+})
+
+test('throws when salt is less than sodium.crypto_pwhash_SALTBYTES', async function (t) {
+  t.plan(1)
+
+  const fastify = require('fastify')({
+    logger: false
+  })
+  t.after(() => fastify.close())
 
   await fastify.register(require('../'), {
     secret: 'a'.repeat(32),
     salt: 'a'.repeat(sodium.crypto_pwhash_SALTBYTES - 1)
   }).after((err) => {
-    t.type(err, Error)
-    t.equal(err.message, `salt must be length ${sodium.crypto_pwhash_SALTBYTES}`)
+    t.assert.strictEqual(err.message, `salt must be length ${sodium.crypto_pwhash_SALTBYTES}`)
   })
 })
 
-tap.test('not throws when salt is greater than or equal to sodium.crypto_pwhash_SALTBYTES', async function (t) {
+test('not throws when salt is greater than or equal to sodium.crypto_pwhash_SALTBYTES', async function (t) {
   t.plan(1)
 
   const fastify = require('fastify')({
     logger: false
   })
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => fastify.close())
 
   await fastify.register(require('../'), {
     secret: 'a'.repeat(32),
     salt: 'a'.repeat(sodium.crypto_pwhash_SALTBYTES)
   }).after((err) => {
-    t.error(err)
+    t.assert.ifError(err)
   })
 })
 
-tap.test('using secret without salt', function (t) {
+test('using secret without salt', async (t) => {
   const fastify = require('fastify')({
     logger: false
   })
@@ -81,8 +79,7 @@ tap.test('using secret without salt', function (t) {
     reply.send('hello world')
   })
 
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(5)
+  t.after(() => fastify.close())
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
@@ -93,33 +90,32 @@ tap.test('using secret without salt', function (t) {
     reply.send(data)
   })
 
-  fastify.inject({
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
+  })
 
-    fastify.inject({
-      method: 'GET',
-      url: '/',
-      headers: {
-        cookie: response.headers['set-cookie']
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.same(JSON.parse(response.payload), {
-        some: 'data'
-      })
-    })
+  t.assert.ok(postResponse)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
+
+  const getResponse = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      cookie: postResponse.headers['set-cookie']
+    }
+  })
+  t.assert.ok(postResponse)
+  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), {
+    some: 'data'
   })
 })
 
-tap.test('using secret with salt as string', function (t) {
+test('using secret with salt as string', async (t) => {
   const fastify = require('fastify')({
     logger: false
   })
@@ -134,9 +130,6 @@ tap.test('using secret with salt as string', function (t) {
     reply.send('hello world')
   })
 
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(5)
-
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
     if (!data) {
@@ -146,33 +139,33 @@ tap.test('using secret with salt as string', function (t) {
     reply.send(data)
   })
 
-  fastify.inject({
+  t.after(() => fastify.close())
+
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
+  })
+  t.assert.ok(postResponse)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
 
-    fastify.inject({
-      method: 'GET',
-      url: '/',
-      headers: {
-        cookie: response.headers['set-cookie']
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.same(JSON.parse(response.payload), {
-        some: 'data'
-      })
-    })
+  const getResponse = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      cookie: postResponse.headers['set-cookie']
+    }
+  })
+  t.assert.ok(getResponse)
+  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), {
+    some: 'data'
   })
 })
 
-tap.test('using secret with salt as buffer', function (t) {
+test('using secret with salt as buffer', async (t) => {
   const fastify = require('fastify')({
     logger: false
   })
@@ -187,9 +180,6 @@ tap.test('using secret with salt as buffer', function (t) {
     reply.send('hello world')
   })
 
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(5)
-
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
     if (!data) {
@@ -199,33 +189,33 @@ tap.test('using secret with salt as buffer', function (t) {
     reply.send(data)
   })
 
-  fastify.inject({
+  t.after(() => fastify.close())
+
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
+  })
+  t.assert.ok(postResponse)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
 
-    fastify.inject({
-      method: 'GET',
-      url: '/',
-      headers: {
-        cookie: response.headers['set-cookie']
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.same(JSON.parse(response.payload), {
-        some: 'data'
-      })
-    })
+  const getResponse = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      cookie: postResponse.headers['set-cookie']
+    }
+  })
+  t.assert.ok(getResponse)
+  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), {
+    some: 'data'
   })
 })
 
-tap.test('signing works with a secret', function (t) {
+test('signing works with a secret', async (t) => {
   const fastify = require('fastify')({
     logger: false
   })
@@ -265,42 +255,39 @@ tap.test('signing works with a secret', function (t) {
     reply.send(data.value)
   })
 
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(7)
+  t.after(() => fastify.close())
 
-  fastify.inject({
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
-
-    const cookieHeader = response.headers['set-cookie'].join(';')
-
-    fastify.inject({
-      method: 'GET',
-      url: '/secure-session',
-      headers: {
-        cookie: cookieHeader
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.same(JSON.parse(response.payload), { some: 'data' })
-
-      fastify.inject({
-        method: 'GET',
-        url: '/cookie-signed',
-        headers: {
-          cookie: cookieHeader
-        }
-      }, (error, response) => {
-        t.error(error)
-        t.same(JSON.parse(response.payload), { some: 'data' })
-      })
-    })
   })
+  t.assert.ok(postResponse)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
+
+  const cookieHeader = postResponse.headers['set-cookie'].join(';')
+
+  const sessionResponse = await fastify.inject({
+    method: 'GET',
+    url: '/secure-session',
+    headers: {
+      cookie: cookieHeader
+    }
+  })
+
+  t.assert.ok(sessionResponse)
+  t.assert.deepStrictEqual(JSON.parse(sessionResponse.payload), { some: 'data' })
+
+  const cookieResponse = await fastify.inject({
+    method: 'GET',
+    url: '/cookie-signed',
+    headers: {
+      cookie: cookieHeader
+    }
+  })
+  t.assert.ok(cookieResponse)
+  t.assert.deepStrictEqual(JSON.parse(cookieResponse.payload), { some: 'data' })
 })

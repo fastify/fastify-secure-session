@@ -1,16 +1,15 @@
 'use strict'
 
-const tap = require('tap')
+const { test } = require('node:test')
 const Fastify = require('fastify')
 const SecureSessionPlugin = require('../')
 const sodium = require('sodium-native')
 const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 sodium.randombytes_buf(key)
 
-tap.test('http-only override', async t => {
+test('http-only override', async t => {
   const fastify = Fastify({ logger: false })
-  t.teardown(fastify.close.bind(fastify))
-  t.plan(3)
+  t.after(() => fastify.close())
 
   await fastify.register(SecureSessionPlugin, {
     key,
@@ -32,14 +31,13 @@ tap.test('http-only override', async t => {
       email: 'me@here.fine'
     }
   })
-
-  t.equal(loginResponse.statusCode, 200)
-  t.ok(loginResponse.headers['set-cookie'])
-  t.not(loginResponse.headers['set-cookie'].split(';')[1].trim(), 'HttpOnly')
+  t.assert.ok(loginResponse)
+  t.assert.strictEqual(loginResponse.statusCode, 200)
+  t.assert.ok(loginResponse.headers['set-cookie'])
+  t.assert.notEqual(loginResponse.headers['set-cookie'].split(';')[1].trim(), 'HttpOnly')
 })
 
-tap.test('Override global options does not change httpOnly default', t => {
-  t.plan(8)
+test('Override global options does not change httpOnly default', async t => {
   const fastify = Fastify()
   fastify.register(SecureSessionPlugin, {
     key,
@@ -55,7 +53,7 @@ tap.test('Override global options does not change httpOnly default', t => {
     reply.send('hello world')
   })
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => fastify.close())
 
   fastify.get('/', (request, reply) => {
     const data = request.session.get('data')
@@ -67,30 +65,28 @@ tap.test('Override global options does not change httpOnly default', t => {
     reply.send(data)
   })
 
-  fastify.inject({
+  const postResponse = await fastify.inject({
     method: 'POST',
     url: '/',
     payload: {
       some: 'data'
     }
-  }, (error, response) => {
-    t.error(error)
-    t.equal(response.statusCode, 200)
-    t.ok(response.headers['set-cookie'])
-    const { maxAge, path } = response.cookies[0]
-    t.equal(maxAge, 1000 * 60 * 60)
-    t.equal(response.headers['set-cookie'].split(';')[3].trim(), 'HttpOnly')
-    t.equal(path, '/')
-
-    fastify.inject({
-      method: 'GET',
-      url: '/',
-      headers: {
-        cookie: response.headers['set-cookie']
-      }
-    }, (error, response) => {
-      t.error(error)
-      t.same(JSON.parse(response.payload), { some: 'data' })
-    })
   })
+  t.assert.ok(postResponse)
+  t.assert.strictEqual(postResponse.statusCode, 200)
+  t.assert.ok(postResponse.headers['set-cookie'])
+  const { maxAge, path } = postResponse.cookies[0]
+  t.assert.strictEqual(maxAge, 1000 * 60 * 60)
+  t.assert.strictEqual(postResponse.headers['set-cookie'].split(';')[3].trim(), 'HttpOnly')
+  t.assert.strictEqual(path, '/')
+
+  const getResponse = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      cookie: postResponse.headers['set-cookie']
+    }
+  })
+  t.assert.ok(getResponse)
+  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), { some: 'data' })
 })
