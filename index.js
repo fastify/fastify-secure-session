@@ -18,7 +18,7 @@ const sessionProxyHandler = {
     }
 
     // accessing own properties, eg request[sessionName].changed
-    if (Object.prototype.hasOwnProperty.call(target, prop)) {
+    if (Object.hasOwn(target, prop)) {
       return target[prop]
     }
 
@@ -27,7 +27,7 @@ const sessionProxyHandler = {
   },
   set (target, prop, value) {
     // modifying own properties, eg request[sessionName].changed
-    if (Object.prototype.hasOwnProperty.call(target, prop)) {
+    if (Object.hasOwn(target, prop)) {
       target[prop] = value
       return true
     }
