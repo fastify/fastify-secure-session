@@ -31,7 +31,7 @@ declare namespace fastifySecureSession {
     /**
      * Regenerates the session
      *
-     * ignoreFields specifies which fields should be kept in the new session object. 
+     * ignoreFields specifies which fields should be kept in the new session object.
      */
     regenerate(ignoreFields?: string[]): void;
   }

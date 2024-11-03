@@ -65,7 +65,7 @@ fastify.register(require('@fastify/secure-session'), {
 fastify.post('/', (request, reply) => {
   request.session.set('data', request.body)
 
-  // or when using a custom sessionName: 
+  // or when using a custom sessionName:
   request.customSessionName.set('data', request.body)
 
   reply.send('hello world')
@@ -82,7 +82,7 @@ fastify.get('/', (request, reply) => {
 
 fastify.get('/ping', (request, reply) => {
   request.session.options({maxAge: 3600})
-  
+
   // Send the session cookie to the client even if the session data didn't change
   // can be used to update cookie expiration
   request.session.touch()
