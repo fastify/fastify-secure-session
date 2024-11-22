@@ -7,7 +7,6 @@ import fastify, {
 import { expectType } from "tsd";
 
 const app: FastifyInstance = fastify();
-app.register(SecureSessionPlugin);
 app.register(SecureSessionPlugin, { key: "foobar" });
 app.register(SecureSessionPlugin, { key: Buffer.from("foo") });
 app.register(SecureSessionPlugin, { key: ["foo", "bar"] });
