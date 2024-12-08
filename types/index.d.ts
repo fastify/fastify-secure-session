@@ -1,8 +1,8 @@
 /// <reference types="node" />
-import { CookieSerializeOptions } from "@fastify/cookie";
-import { FastifyPluginCallback, FastifyBaseLogger } from "fastify";
+import { CookieSerializeOptions } from '@fastify/cookie'
+import { FastifyPluginCallback, FastifyBaseLogger } from 'fastify'
 
-declare module "fastify" {
+declare module 'fastify' {
   interface FastifyInstance {
     createSecureSession(data?: Record<string, any>): fastifySecureSession.Session
     decodeSecureSession(cookie: string, log?: FastifyBaseLogger, sessionName?: string): fastifySecureSession.Session | null
@@ -14,7 +14,7 @@ declare module "fastify" {
   }
 }
 
-type FastifySecureSession = FastifyPluginCallback<fastifySecureSession.SecureSessionPluginOptions | (fastifySecureSession.SecureSessionPluginOptions & Required<Pick<fastifySecureSession.SecureSessionPluginOptions, 'sessionName'>>)[]>;
+type FastifySecureSession = FastifyPluginCallback<fastifySecureSession.SecureSessionPluginOptions | (fastifySecureSession.SecureSessionPluginOptions & Required<Pick<fastifySecureSession.SecureSessionPluginOptions, 'sessionName'>>)[]>
 interface SessionData {}
 
 declare namespace fastifySecureSession {
@@ -50,5 +50,5 @@ declare namespace fastifySecureSession {
   export { fastifySecureSession as default }
 }
 
-declare function fastifySecureSession(...params: Parameters<FastifySecureSession>): ReturnType<FastifySecureSession>
+declare function fastifySecureSession (...params: Parameters<FastifySecureSession>): ReturnType<FastifySecureSession>
 export = fastifySecureSession
