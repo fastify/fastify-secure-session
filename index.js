@@ -11,7 +11,7 @@ const sessionProxyHandler = {
     // Calling functions eg request[sessionName].get('key') or request[sessionName].set('key', 'value')
     if (typeof target[prop] === 'function') {
       return new Proxy(target[prop], {
-        apply (applyTarget, thisArg, args) {
+        apply (applyTarget, _thisArg, args) {
           return Reflect.apply(applyTarget, target, args)
         }
       })
@@ -242,10 +242,10 @@ function fastifySecureSession (fastify, options, next) {
 
   next()
 
-  function addHooks (fastify, options, next) {
+  function addHooks (fastify, _options, next) {
     // the hooks must be registered after @fastify/cookie hooks
 
-    fastify.addHook('onRequest', (request, reply, next) => {
+    fastify.addHook('onRequest', (request, _reply, next) => {
       for (const [sessionName, { cookieName, cookieOptions }] of sessionNames.entries()) {
         let cookie = request.cookies[cookieName]
 
@@ -265,7 +265,7 @@ function fastifySecureSession (fastify, options, next) {
       next()
     })
 
-    fastify.addHook('onSend', (request, reply, payload, next) => {
+    fastify.addHook('onSend', (request, reply, _payload, next) => {
       for (const [sessionName, { cookieName, cookieOptions }] of sessionNames.entries()) {
         const session = request[sessionName]
 
