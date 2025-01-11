@@ -54,7 +54,7 @@ fastify.register(require('@fastify/secure-session'), {
   // adapt this to point to the directory where secret-key is located
   key: fs.readFileSync(path.join(__dirname, 'secret-key')),
   // the amount of time the session is considered valid; this is different from the cookie options
-  // and based on value wihin the session.
+  // and based on value within the session.
   expiry: 24 * 60 * 60, // Default 1 day
   cookie: {
     path: '/'
@@ -96,7 +96,7 @@ fastify.post('/logout', (request, reply) => {
 ```
 
 If you enable [`debug` level logging](https://fastify.dev/docs/latest/Reference/Logging/),
-you will see what steps the library is doing and understand why a session you
+you will see what steps the library is taking and understand why a session you
 expect to be there is not present. For extra details, you can also enable `trace`
 level logging.
 
@@ -143,7 +143,7 @@ const hexString = keyBuffer.toString('hex');
 console.log(hexString) // Outputs: 4fe91796c30bd989d95b62dc46c7c3ba0b6aa2df2187400586a4121c54c53b85
 ```
 
-To use your hexadecimal string with this plugin you would need convert it back into a Buffer:
+To use your hexadecimal string with this plugin you would need to convert it back into a Buffer:
 
 ```js
 fastify.register(require('@fastify/secure-session'), {
@@ -167,7 +167,7 @@ fastify.post('/clear-session', (request, reply) => {
 
 #### Security
 
-- Although the example reads the key from a file on disk, it is poor practice when it comes to security. Ideally, you should store secret/keys into a key management service like Vault, KMS or something similar and read them at run-time.
+- Although the example reads the key from a file on disk, it is poor practice when it comes to security. Ideally, you should store secret/keys in a key management service like Vault, KMS, or something similar and read them at run-time.
 - Use `httpOnly` session cookie for all production purposes to reduce the risk of session highjacking or XSS.
 
 ## Using a secret
@@ -218,7 +218,7 @@ fastify.listen({ port: 3000 })
 
 ## Using Keys with key rotation
 
-It is possible to use an non-empty array for the key field to support key rotation as an additional security measure.
+It is possible to use a non-empty array for the key field to support key rotation as an additional security measure.
 Cookies will always be signed with the first key in the array to try to "err on the side of performance" however
 if decoding the key fails, it will attempt to decode using every subsequent value in the key array.
 
@@ -299,10 +299,10 @@ fastify.get('/', (request, reply) => {
 fastify.listen({ port: 3000 })
 ```
 
-WARNING: The more keys you have in the key array can make the decode operation get expensive if too many keys are used.
+WARNING: The more keys you have in the key array can make the decode operation get expensive if too many keys are used
 at once. It is recommended to only use 2 keys at a given time so that the most decode attempts will ever be is 2.
 This should allow ample support time for supporting sessions with an old key while rotating to the new one. If you have
-really long lived sessions it could be possible to need to support 3 or even 4 keys. Since old sessions are re-signed
+long-lived sessions it could be possible to need to support 3 or even 4 keys. Since old sessions are re-signed
 with the key at the first index the next time they are seen by the application, you can get away with this. That first
 time the older session is decoded will be a little more expensive though.
 
@@ -323,7 +323,7 @@ fastify.post('/', (request, reply) => {
 
 ## Integrating with other libraries
 
-If you need to encode or decode a session in related systems (like say `@fastify/websocket`, which does not use normal Fastify `Request` objects), you can use `@fastify/secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle tested by the community, but the option is there if you need it.
+If you need to encode or decode a session in related systems (like say `@fastify/websocket`, which does not use normal Fastify `Request` objects), you can use `@fastify/secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle-tested by the community, but the option is there if you need it.
 
 ```js
 fastify.createSecureSession({ foo: 'bar' })
@@ -389,4 +389,4 @@ Moreover, to protect users from further attacks, all cookies are created as "htt
 
 ## License
 
-MIT
+Licensed under [MIT](./LICENSE).
