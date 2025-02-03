@@ -1,6 +1,6 @@
 # @fastify/secure-session
 
-[![CI](https://github.com/fastify/fastify-secure-session/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/fastify/fastify-secure-session/actions/workflows/ci.yml)
+[![CI](https://github.com/fastify/fastify-secure-session/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fastify/fastify-secure-session/actions/workflows/ci.yml)
 [![NPM version](https://img.shields.io/npm/v/@fastify/secure-session.svg?style=flat)](https://www.npmjs.com/package/@fastify/secure-session)
 [![neostandard javascript style](https://img.shields.io/badge/code_style-neostandard-brightgreen?style=flat)](https://github.com/neostandard/neostandard)
 
