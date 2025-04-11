@@ -317,13 +317,13 @@ class Session {
   }
 
   set (key, value) {
-    this.changed = true
+    this.touch()
     this[kObj][key] = value
   }
 
   delete () {
-    this.changed = true
     this.deleted = true
+    this.touch()
   }
 
   options (opts) {
@@ -341,6 +341,7 @@ class Session {
 
   touch () {
     this.changed = true
+    this[kObj].__ts = Math.round(Date.now() / 1000)
   }
 
   regenerate (ignoredFields) {
@@ -350,7 +351,7 @@ class Session {
       }
       delete this[kObj][key]
     }
-    this.changed = true
+    this.touch()
   }
 }
 
