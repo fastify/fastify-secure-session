@@ -171,9 +171,9 @@ test('Anti re-use should still allow touch() to work', async t => {
   })
   const newCookie = secondPostResponse.headers['set-cookie']
 
-  t.assert.ok(firstPostResponse)
-  t.assert.strictEqual(firstPostResponse.statusCode, 200)
-  t.assert.ok(firstPostResponse.headers['set-cookie'])
+  t.assert.ok(secondPostResponse)
+  t.assert.strictEqual(secondPostResponse.statusCode, 200)
+  t.assert.ok(secondPostResponse.headers['set-cookie'])
 
   clock.jump('00:00:02') // forward just after expiry
 
