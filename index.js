@@ -91,7 +91,7 @@ function fastifySecureSession (fastify, options, next) {
     if (sessionOptions.key) {
       key = sessionOptions.key
       if (typeof key === 'string') {
-        key = Buffer.from(key, 'base64')
+        key = Buffer.from(key, 'ascii')
       } else if (Array.isArray(key)) {
         try {
           key = key.map(ensureBufferKey)
