@@ -3,9 +3,9 @@
 const { test } = require('node:test')
 const Fastify = require('fastify')
 const sodium = require('sodium-native')
-const cookie = require('cookie')
+const { parseSetCookie } = require('cookie')
 const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
-const expires = new Date(Date.now() + (86400 * 1000))
+const expires = new Date(Date.now() + 86400 * 1000)
 const expiresUTC = expires.toUTCString()
 
 sodium.randombytes_buf(key)
@@ -56,9 +56,18 @@ test('Deletes the cookie', async (t) => {
   t.assert.ok(postResponse)
   t.assert.strictEqual(postResponse.statusCode, 200)
   t.assert.ok(postResponse.headers['set-cookie'])
-  t.assert.strictEqual(cookie.parse(postResponse.headers['set-cookie']).Path, '/')
-  t.assert.strictEqual(cookie.parse(postResponse.headers['set-cookie']).Expires, expiresUTC)
-  t.assert.strictEqual(cookie.parse(postResponse.headers['set-cookie'])['Max-Age'], '86400')
+  t.assert.strictEqual(
+    parseSetCookie(postResponse.headers['set-cookie']).path,
+    '/'
+  )
+  t.assert.strictEqual(
+    parseSetCookie(postResponse.headers['set-cookie']).expires.toUTCString(),
+    expiresUTC
+  )
+  t.assert.strictEqual(
+    parseSetCookie(postResponse.headers['set-cookie']).maxAge,
+    86400
+  )
 
   const getResponse = await fastify.inject({
     method: 'GET',
@@ -68,7 +77,10 @@ test('Deletes the cookie', async (t) => {
     }
   })
   t.assert.ok(getResponse)
-  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), { some: 'someData', some2: { a: 1, c: 3 } })
+  t.assert.deepStrictEqual(JSON.parse(getResponse.payload), {
+    some: 'someData',
+    some2: { a: 1, c: 3 }
+  })
 
   const deleteResponse = await fastify.inject({
     method: 'POST',
@@ -80,7 +92,16 @@ test('Deletes the cookie', async (t) => {
   t.assert.ok(deleteResponse)
   t.assert.strictEqual(deleteResponse.statusCode, 200)
   t.assert.ok(deleteResponse.headers['set-cookie'])
-  t.assert.strictEqual(cookie.parse(deleteResponse.headers['set-cookie']).Path, '/')
-  t.assert.strictEqual(cookie.parse(deleteResponse.headers['set-cookie']).Expires, 'Thu, 01 Jan 1970 00:00:00 GMT')
-  t.assert.strictEqual(cookie.parse(deleteResponse.headers['set-cookie'])['Max-Age'], '0')
+  t.assert.strictEqual(
+    parseSetCookie(deleteResponse.headers['set-cookie']).path,
+    '/'
+  )
+  t.assert.strictEqual(
+    parseSetCookie(deleteResponse.headers['set-cookie']).expires.toUTCString(),
+    'Thu, 01 Jan 1970 00:00:00 GMT'
+  )
+  t.assert.strictEqual(
+    parseSetCookie(deleteResponse.headers['set-cookie']).maxAge,
+    0
+  )
 })
