@@ -3,7 +3,7 @@
 const { test } = require('node:test')
 const Fastify = require('fastify')
 const sodium = require('sodium-native')
-const cookie = require('cookie')
+const { parseSetCookie } = require('cookie')
 const key = Buffer.alloc(sodium.crypto_secretbox_KEYBYTES)
 
 sodium.randombytes_buf(key)
@@ -34,5 +34,8 @@ test('sets path on the cookie', async (t) => {
   t.assert.ok(response)
   t.assert.strictEqual(response.statusCode, 200)
   t.assert.ok(response.headers['set-cookie'])
-  t.assert.strictEqual(cookie.parse(response.headers['set-cookie']).Path, '/')
+  t.assert.strictEqual(
+    parseSetCookie(response.headers['set-cookie']).path,
+    '/'
+  )
 })
