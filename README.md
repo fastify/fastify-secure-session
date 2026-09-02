@@ -102,7 +102,6 @@ level logging.
 
 Note: Instead of using the `get` and `set` methods as seen above, you may also wish to use property getters and setters to make your code compatible with other libraries ie `request.session.data = request.body` and `const data = request.session.data` are also possible. However, if you want to have properties named `changed` or `deleted` in your session data, they can only be accessed via `session.get()` and `session.set()`. (Those are the names of internal properties used by the Session object)
 
-
 ### Multiple sessions
 
 If you want to use multiple sessions, you have to supply an array of options when registering the plugin. It supports the same options as a single session but in this case, the `sessionName` name is mandatory.
@@ -169,6 +168,7 @@ fastify.post('/clear-session', (request, reply) => {
 
 - Although the example reads the key from a file on disk, it is poor practice when it comes to security. Ideally, you should store secret/keys in a key management service like Vault, KMS, or something similar and read them at run-time.
 - Use `httpOnly` session cookie for all production purposes to reduce the risk of session highjacking or XSS.
+- Use `secure: true` (or `secure: 'auto'`) and an appropriate `sameSite` value to further harden the session cookie. See [Cookie security options](#cookie-security-options-secure-samesite-and-the-host--prefix) below.
 
 ## Using a secret
 
@@ -318,6 +318,36 @@ fastify.post('/', (request, reply) => {
   // .options takes any parameter that you can pass to setCookie
   request.session.options({ maxAge: 60 * 60 }); // 3600 seconds => maxAge is always passed in seconds
   reply.send('hello world')
+})
+```
+
+## Cookie security options (`secure`, `sameSite`, and the `__Host-` prefix)
+
+The `cookie` option is passed straight through to [`@fastify/cookie`](https://github.com/fastify/fastify-cookie)'s `setCookie`, so all of its options are supported out of the box, including `secure` and `sameSite`:
+
+```js
+fastify.register(require('@fastify/secure-session'), {
+  key: fs.readFileSync(path.join(__dirname, 'secret-key')),
+  cookie: {
+    path: '/',
+    httpOnly: true,
+    secure: true, // or 'auto' to only set secure when the request is over HTTPS
+    sameSite: 'strict' // or 'lax' / 'none'
+  }
+})
+```
+
+You can also use the `__Host-` cookie name prefix, which browsers enforce must be paired with `secure: true`, `path: '/'`, and no `domain`:
+
+```js
+fastify.register(require('@fastify/secure-session'), {
+  key: fs.readFileSync(path.join(__dirname, 'secret-key')),
+  cookieName: '__Host-session',
+  cookie: {
+    path: '/',
+    secure: true,
+    sameSite: 'strict'
+  }
 })
 ```
 
