@@ -211,7 +211,7 @@ function fastifySecureSession (fastify, options, next) {
     return session
   })
 
-  fastify.decorate('createSecureSession', (data) => new Proxy(new Session(data), sessionProxyHandler))
+  fastify.decorate('createSecureSession', (data = {}) => new Proxy(new Session(data), sessionProxyHandler))
 
   fastify.decorate('encodeSecureSession', (session, sessionName = defaultSessionName) => {
     if (!sessionNames.has(sessionName)) {

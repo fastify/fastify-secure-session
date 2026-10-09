@@ -19,6 +19,9 @@ test('it exposes encode and decode decorators for other libraries to use', async
   t.assert.strictEqual(session.get('foo'), 'bar')
   t.assert.strictEqual(typeof session.get('somethingElse'), 'undefined')
 
+  const emptySession = fastify.createSecureSession()
+  t.assert.deepStrictEqual(emptySession.data(), {})
+
   t.assert.ok(fastify.encodeSecureSession(fastify.createSecureSession({ foo: 'bar' })))
   t.assert.ok(fastify.encodeSecureSession(fastify.createSecureSession({})))
   t.assert.notEqual(fastify.encodeSecureSession(fastify.createSecureSession({ foo: 'bar' })), fastify.encodeSecureSession(fastify.createSecureSession({})))
