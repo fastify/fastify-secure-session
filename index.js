@@ -221,7 +221,7 @@ function fastifySecureSession (fastify, options, next) {
     const { key } = sessionNames.get(sessionName)
 
     const nonce = genNonce()
-    const msg = Buffer.from(JSON.stringify(session[kObj]))
+    const msg = Buffer.from(JSON.stringify(session[kObj], bigintReplacer))
 
     const cipher = Buffer.allocUnsafe(msg.length + sodium.crypto_secretbox_MACBYTES)
     sodium.crypto_secretbox_easy(cipher, msg, nonce, key[0])
@@ -377,6 +377,10 @@ function isBufferKeyLengthInvalid (k) {
   // the key should be strictly equals to sodium.crypto_secretbox_KEYBYTES
   // or this will result in a runtime error when encoding the session
   return k.length !== sodium.crypto_secretbox_KEYBYTES
+}
+
+function bigintReplacer (_key, value) {
+  return typeof value === 'bigint' ? value.toString() : value
 }
 
 module.exports = fp(fastifySecureSession, {
