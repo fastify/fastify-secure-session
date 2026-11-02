@@ -254,6 +254,12 @@ function fastifySecureSession (fastify, options, next) {
 
           if (unsignedCookie.valid === true) {
             cookie = unsignedCookie.value
+          } else {
+            // A signed cookie is required but the signature is invalid (e.g.
+            // the signing key was rotated). Do not attempt to decode it: an
+            // attacker could otherwise strip a stale signature and the session
+            // would still be decrypted with the (unchanged) encryption key.
+            cookie = undefined
           }
         }
 

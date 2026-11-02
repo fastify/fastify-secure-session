@@ -255,6 +255,8 @@ fastify.register(require('@fastify/secure-session'), {
 See that `myNewKey` was added to the first index position in the key array. This allows any sessions that were created
 with the original `mySecureKey` to still be decoded. The first time a session signed with an older key is "seen", by the application, this library will re-sign the cookie with the newest session key therefore improving performance for any subsequent session decodes.
 
+Session validity is governed by this encryption `key` array, not by the `@fastify/cookie` signing `secret`. Existing sessions remain valid as long as the key that encrypted them is still present in the array, so dropping an old key from the array is what retires every session encrypted with it. Rotating only the cookie signing `secret` does not invalidate existing sessions, because they remain decryptable through the encryption `key`.
+
 To see a full working example, make sure you generate `secret-key1` and `secret-key2` alongside the js file below by running:
 
 ```
@@ -373,6 +375,8 @@ fastify.encodeSecureSession(request.session, 'mySecondSession')
 
 fastify.decodeSecureSession(request.cookies['session'], undefined, 'mySecondSession')
 ```
+
+Note that `decodeSecureSession` is a raw decryptor: it decrypts the session payload but does not verify the cookie signature. When the session cookie is configured with `signed: true`, the signature is checked by the plugin's own request hook, not by this decorator. If you call `decodeSecureSession` yourself on a signed cookie, verify the signature first with `fastify.unsignCookie(value)` and only decode when `valid` is `true`, otherwise an attacker-supplied value whose signature does not match could still be decrypted.
 
 ## Add TypeScript types
 
