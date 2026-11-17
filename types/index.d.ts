@@ -36,11 +36,17 @@ declare namespace fastifySecureSession {
     regenerate(ignoreFields?: string[]): void;
   }
 
+  export interface SessionSerializer {
+    stringify(value: any): string
+    parse(text: string): any
+  }
+
   export type SecureSessionPluginOptions = {
     cookie?: CookieSerializeOptions
     cookieName?: string
     sessionName?: string
     expiry?: number
+    serializer?: SessionSerializer
   } & ({ key: string | Buffer | (string | Buffer)[] } | {
     secret: string | Buffer,
     salt: string | Buffer
