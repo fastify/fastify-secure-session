@@ -52,6 +52,11 @@ function fastifySecureSession (fastify, options, next) {
     const cookieName = sessionOptions.cookieName || sessionName
     const expiry = sessionOptions.expiry || 86401 // 24 hours
     const cookieOptions = sessionOptions.cookieOptions || sessionOptions.cookie || {}
+    const serializer = sessionOptions.serializer || JSON
+
+    if (typeof serializer.stringify !== 'function' || typeof serializer.parse !== 'function') {
+      return next(new Error('serializer must have stringify and parse functions'))
+    }
 
     if (cookieOptions.httpOnly === undefined) {
       cookieOptions.httpOnly = true
@@ -135,7 +140,8 @@ function fastifySecureSession (fastify, options, next) {
       cookieName,
       cookieOptions,
       key,
-      expiry
+      expiry,
+      serializer
     })
 
     if (!defaultSessionName) {
@@ -154,7 +160,7 @@ function fastifySecureSession (fastify, options, next) {
       throw new Error('Unknown session key.')
     }
 
-    const { key, expiry } = sessionNames.get(sessionName)
+    const { key, expiry, serializer } = sessionNames.get(sessionName)
 
     // do not use destructuring or it will deopt
     const split = cookie.split(';')
@@ -199,7 +205,7 @@ function fastifySecureSession (fastify, options, next) {
       return null
     }
 
-    const parsed = JSON.parse(msg)
+    const parsed = serializer.parse(msg.toString())
     if ((parsed.__ts + expiry) * 1000 - Date.now() <= 0) {
       // maximum validity is reached, resetting
       log.debug('@fastify/secure-session: expiry reached')
@@ -218,10 +224,10 @@ function fastifySecureSession (fastify, options, next) {
       throw new Error('Unknown session key.')
     }
 
-    const { key } = sessionNames.get(sessionName)
+    const { key, serializer } = sessionNames.get(sessionName)
 
     const nonce = genNonce()
-    const msg = Buffer.from(JSON.stringify(session[kObj]))
+    const msg = Buffer.from(serializer.stringify(session[kObj]))
 
     const cipher = Buffer.allocUnsafe(msg.length + sodium.crypto_secretbox_MACBYTES)
     sodium.crypto_secretbox_easy(cipher, msg, nonce, key[0])

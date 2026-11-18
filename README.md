@@ -353,6 +353,38 @@ fastify.register(require('@fastify/secure-session'), {
 })
 ```
 
+## Custom serializer
+
+By default the session data is serialized with `JSON.stringify` and `JSON.parse`, so values that JSON cannot represent (such as `BigInt`, `Date` or `Map`) either throw or do not round-trip. You can pass a `serializer` object with `stringify` and `parse` functions to control how the data is encoded before it is encrypted. Each session in a [multiple sessions](#multiple-sessions) setup can have its own serializer.
+
+For example, to store `BigInt` values:
+
+```js
+fastify.register(require('@fastify/secure-session'), {
+  key: fs.readFileSync(path.join(__dirname, 'secret-key')),
+  serializer: {
+    stringify: (data) => JSON.stringify(data, (_key, value) =>
+      typeof value === 'bigint' ? { $bigint: value.toString() } : value),
+    parse: (text) => JSON.parse(text, (_key, value) =>
+      value !== null && typeof value === 'object' && typeof value.$bigint === 'string'
+        ? BigInt(value.$bigint)
+        : value)
+  }
+})
+
+fastify.post('/', (request, reply) => {
+  request.session.set('balance', 9007199254740993n)
+  reply.send('ok')
+})
+
+fastify.get('/', (request, reply) => {
+  const balance = request.session.get('balance') // 9007199254740993n
+  reply.send({ balance: balance.toString() })
+})
+```
+
+`parse` must return an object, and the plugin stores its own `__ts` timestamp number in it, so the serializer has to round-trip plain numbers unchanged. If you switch serializers on an existing deployment, `parse` must still accept cookies written by the previous one; an error thrown by `parse` is not caught by the plugin.
+
 ## Integrating with other libraries
 
 If you need to encode or decode a session in related systems (like say `@fastify/websocket`, which does not use normal Fastify `Request` objects), you can use `@fastify/secure-session`'s decorators to encode and decode sessions yourself. This is less than ideal as this library's cookie setting code is battle-tested by the community, but the option is there if you need it.

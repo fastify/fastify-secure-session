@@ -1,4 +1,4 @@
-import SecureSessionPlugin, { Session, SessionData } from '.'
+import SecureSessionPlugin, { Session, SessionData, SessionSerializer } from '.'
 import fastify, {
   FastifyRequest,
   FastifyInstance,
@@ -13,6 +13,16 @@ app.register(SecureSessionPlugin, { key: ['foo', 'bar'] })
 app.register(SecureSessionPlugin, { secret: 'foo', salt: 'bar' })
 app.register(SecureSessionPlugin, { sessionName: 'foo', key: 'bar' })
 app.register(SecureSessionPlugin, { expiry: 24 * 60 * 60, key: 'bar' })
+app.register(SecureSessionPlugin, { serializer: JSON, key: 'bar' })
+app.register(SecureSessionPlugin, {
+  key: 'bar',
+  serializer: {
+    stringify: (value) => JSON.stringify(value),
+    parse: (text) => JSON.parse(text)
+  }
+})
+expect(SecureSessionPlugin).type.not.toBeCallableWith(app, { key: 'bar', serializer: { stringify: JSON.stringify } }, () => {})
+expect<SessionSerializer['parse']>().type.toBe<(text: string) => any>()
 app.register(SecureSessionPlugin, [
   { sessionName: 'foo', key: 'bar' },
   { sessionName: 'bar', key: 'bar' }
